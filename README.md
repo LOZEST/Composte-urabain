@@ -1,5 +1,5 @@
-![Logo Green Loop](logo.jpg)
-# (Logo green loop) Compost Urbain Autonome – Olympiades des Sciences de l’Ingénieur
+
+# (![Logo Green Loop](logo.jpg)) Compost Urbain Autonome – Olympiades des Sciences de l’Ingénieur
 
 ##  Présentation du projet
 
