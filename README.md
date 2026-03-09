@@ -1,5 +1,6 @@
 
-# (Logo Green Loop) Compost Urbain Autonome – Olympiades des Sciences de l’Ingénieur
+# (<img width="288" height="288" alt="image" src="https://github.com/user-attachments/assets/5566e445-7e59-4c4f-8d6f-80ce420a6304" />
+) Compost Urbain Autonome – Olympiades des Sciences de l’Ingénieur
 
 ##  Présentation du projet
 
