@@ -34,11 +34,11 @@ Le système traite les données de pesée et l'état des capteurs pour piloter l
 ---
 
 ## 👥 L'Équipe
-- **Louis Giraudel** : [Ton rôle, ex: Développement Arduino & Électronique]
-- **Lucien Bisiaux** : [Rôle]
-- **Eliot Farys** : [Rôle]
-- **Theophile Berenger** : [Rôle]
-- **Clement Hintzy** : [Rôle]
+- **Louis Giraudel** : [Chef de projet]
+- **Lucien Bisiaux** : [sous chef]
+- **Eliot Farys** : [directeur du pole informatique]
+- **Theophile Berenger** : [directeur du pole 3D]
+- **Clement Hintzy** : [directeur du pole codage]
 
 ---
 
