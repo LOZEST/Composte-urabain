@@ -1,50 +1,37 @@
-# 🌿 Greenloop : Composteur Urbain Autonome & Connecté
-> **Projet Lauréat - Olympiades des Sciences de l'Ingénieur 2026**
+# 🌿 Greenloop — Composteur Urbain Autonome (OSI 2026)
 
-<img src="https://github.com/user-attachments/assets/5566e445-7e59-4c4f-8d6f-80ce420a6304" width="200" align="right" />
+<img src="https://github.com/user-attachments/assets/5566e445-7e59-4c4f-8d6f-80ce420a6304" width="250" align="right" />
 
-Greenloop est une solution IoT innovante visant à réduire l'empreinte carbone urbaine en transformant les déchets organiques en ressource locale, de manière totalement autonome.
-
-## 🚀 Fonctionnalités Clés
-- **Accès Sécurisé :** Ouverture via scan de QR Code (Interface utilisateur dédiée).
-- **Intelligence Embarquée :** Pesée automatique des biodéchets et capteurs de niveau.
-- **Cycle de Vie Géré :** Suivi de 3 états de décomposition (Matière fraîche > Transformation > Compost mûr).
-- **Autonomie Énergétique :** Alimentation par panneaux solaires avec gestion optimisée de la consommation.
-
-## 🛠️ Stack Technique
-- **Hardware :** Arduino (Microcontrôleur), Capteurs de pression (Load cells), Servo-moteurs, Panneau Solaire.
-- **CAO / Modélisation :** Fusion 360 (Conception 3D de la trappe et structure), Impression 3D.
-- **Logiciel :** C++ (Arduino IDE), Appli mobile (suivi des statistiques).
-- **Ingénierie :** Diagrammes SysML (Chaîne d'énergie & d'information).
+**Greenloop** est notre projet pour les Olympiades des Sciences de l'Ingénieur. L'objectif : concevoir un composteur intelligent et 100% autonome capable de transformer les biodéchets en ressource locale, directement en ville.
 
 ---
 
-## 📐 Conception & Ingénierie
+## 🚀 Le Concept
+L'idée est de simplifier le compostage urbain en levant les freins habituels (odeurs, gestion complexe, accès libre). 
+* **Accès sécurisé :** Ouverture de la trappe par scan de QR Code.
+* **Suivi intelligent :** Pesée automatique des apports pour récolter des stats précises.
+* **Cycle géré :** Le système gère le passage des déchets à travers 3 états de décomposition.
+* **Zéro branchement :** Entièrement alimenté par panneau solaire.
 
-### Modélisation 3D (Fusion 360)
-*Insère ici une capture d'écran de ta modélisation de trappe ou de l'assemblage complet.*
+## 🛠️ Notre approche technique
+Pour ce projet, on a dû toucher à tout :
+* **Ingénierie & SysML :** Analyse du besoin, diagrammes de blocs (chaîne d'énergie/info) et calculs de dimensionnement solaire.
+* **Conception 3D :** Modélisation de la trappe et du châssis sur **Fusion 360**, avec des pièces réalisées en impression 3D.
+* **Électronique & Code :** Pilotage via **Arduino** (servomoteurs, capteurs de pression/load cells, gestion de la batterie).
+* **Data :** Suivi du budget et des composants via Excel.
 
-### Chaîne d'Information
-Le système traite les données de pesée et l'état des capteurs pour piloter les moteurs de transfert entre les compartiments. 
-- **Entrée :** QR Code / Capteur de poids.
-- **Traitement :** Logique Arduino de gestion des cycles.
-- **Sortie :** Ouverture trappe / Affichage état.
-
----
-
-## 👥 L'Équipe
-- **Louis Giraudel** : [Ton rôle, ex: Développement Arduino & Électronique]
-- **Lucien Bisiaux** : [Rôle]
-- **Eliot Farys** : [Rôle]
-- **Theophile Berenger** : [Rôle]
-- **Clement Hintzy** : [Rôle]
+## 👥 L'équipe (TK 2026)
+Projet réalisé par : 
+**Louis Giraudel, Lucien Bisiaux, Eliot Farys, Théophile Berenger et Clément Hintzy.**
 
 ---
 
-## 📈 Résultats & Livrables
-- [x] Liste des composants et dimensionnement énergétique.
-- [x] Code source de la gestion des capteurs.
-- [x] Schémas de câblage.
-- [x] Modèles 3D (fichiers .STL disponibles).
+## 📂 Contenu du dépôt
+* `/Code` : Scripts Arduino pour la gestion des cycles et de la trappe.
+* `/CAO` : Fichiers de conception 3D et rendus Fusion 360.
+* `/Documentation` : Dossier technique, SysML et étude énergétique.
+
+---
+*Projet développé dans le cadre des Olympiades des Sciences de l'Ingénieur.*
 ---
 
