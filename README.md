@@ -180,23 +180,24 @@ Greenloop/
 ```
 
 ---
-Voici un accès direct aux différentes ressources du projet :
 
- Documents de soutien  
-👉 [Accéder au dossier Soutien](./Soutien)
+# Ressources du projet
 
- Codes du projet  
-👉 [Accéder au dossier Code](./Code)
+### Soutiens
+ [Courriers et partenariats](./Soutien)
 
- Conception 3D (CAO)  
-👉 [Accéder au dossier CAO](./CAO)
+### Code
+ [Code Arduino et application](./Code)
 
- Documentation technique  
-👉 [Accéder au dossier Documentation](./Documentation)
+### Conception 3D
+ [Fichiers CAO](./CAO)
 
- Présentation du projet  
-👉 [Accéder au dossier Presentation](./Presentation)
+### Documentation
+ [Tableurs Excel et diagrammes](./Documentation)
 
+### Présentation
+ [Slides PowerPoint](./Presentation)
+ [Vidéo de démonstration](./Presentation/demo_projet.mp4)
 ---
 
 #  Équipe
