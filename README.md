@@ -183,21 +183,20 @@ Greenloop/
 
 # Ressources du projet
 
-### Soutiens
+ Soutiens
  [Courriers et partenariats](./Soutien)
 
-### Code
+ Code
  [Code Arduino et application](./Code)
 
-### Conception 3D
+ Conception 3D
  [Fichiers CAO](./CAO)
 
-### Documentation
+ Documentation
  [Tableurs Excel et diagrammes](./Documentation)
 
-### Présentation
- [Slides PowerPoint](./Presentation)
- [Vidéo de démonstration](./Presentation/demo_projet.mp4)
+Présentation du projet 
+ [Accéder au dossier Presentation](./Presentation)
 ---
 
 #  Équipe
