@@ -1,4 +1,4 @@
-# 🌱 Greenloop — Composteur Urbain Autonome (OSI 2026)
+#  Greenloop — Composteur Urbain Autonome (OSI 2026)
 
 https://www.ecosia.org/search?q=%3Cimg+src%3D%22https%3A%2F%2Fgithub.com%2Fuser-attachments%2Fassets%2F5566e445-7e59-4c4f-8d6f-80ce420a6304%22+width%3D%22250%22+align%3D%22right%22+%2F%3E&addon=chromegpo
 
@@ -15,7 +15,7 @@ L'objectif est de concevoir un **composteur urbain intelligent et autonome**, ca
 
 ---
 
-# 📑 Sommaire
+#  Sommaire
 
 * [Le concept](#-le-concept)
 * [Objectifs du projet](#-objectifs-du-projet)
@@ -29,7 +29,7 @@ L'objectif est de concevoir un **composteur urbain intelligent et autonome**, ca
 
 ---
 
-# 🌍 Le concept
+# Le concept
 
 Le projet **Greenloop** vise à rendre le **compostage urbain simple, accessible et autonome**.
 
@@ -44,24 +44,24 @@ Greenloop apporte une solution en intégrant **automatisation, capteurs et éner
 
 ### Fonctionnalités principales
 
-♻️ **Accès sécurisé**
+ **Accès sécurisé**
 Ouverture de la trappe via scan de QR Code.
 
-⚖️ **Pesée automatique**
+ **Pesée automatique**
 Mesure du poids des biodéchets déposés.
 
-🔄 **Cycle de compostage intelligent**
+ **Cycle de compostage intelligent**
 Gestion de plusieurs états de décomposition.
 
-☀️ **Autonomie énergétique**
+ **Autonomie énergétique**
 Système alimenté par panneau solaire.
 
-📊 **Suivi des données**
+ **Suivi des données**
 Possibilité d'analyser les apports et l'utilisation.
 
 ---
 
-# 🎯 Objectifs du projet
+#  Objectifs du projet
 
 * Encourager le **tri des biodéchets en ville**
 * Simplifier l'utilisation du compostage collectif
@@ -70,7 +70,7 @@ Possibilité d'analyser les apports et l'utilisation.
 
 ---
 
-# 🧪 Prototype
+#  Prototype
 
 Le prototype intègre :
 
@@ -90,7 +90,7 @@ Le prototype intègre :
 
 ---
 
-# ⚙️ Architecture système
+#  Architecture système
 
 Le système repose sur deux chaînes principales :
 
@@ -143,7 +143,7 @@ Suivi du budget et des composants avec **Excel**.
 
 ---
 
-# 📂 Structure du projet
+#  Structure du projet
 
 ```text
 Greenloop/
@@ -167,22 +167,22 @@ Greenloop/
 
 ---
 
-# 📁 Contenu du dépôt
+#  Contenu du dépôt
 
 Accès direct aux ressources du projet :
 
-💻 **Codes Arduino**
-👉 [Accéder au dossier Code](./Code)
+ **Codes Arduino**
+ [Accéder au dossier Code](./Code)
 
-🧩 **Conception 3D (CAO)**
-👉 [Accéder au dossier CAO](./CAO)
+ **Conception 3D (CAO)**
+ [Accéder au dossier CAO](./CAO)
 
-📑 **Documentation technique**
-👉 [Accéder au dossier Documentation](./Documentation)
+ **Documentation technique**
+ [Accéder au dossier Documentation](./Documentation)
 
 ---
 
-# 👥 Équipe
+#  Équipe
 
 Projet réalisé par :
 
@@ -196,12 +196,12 @@ Dans le cadre des **Olympiades des Sciences de l’Ingénieur 2026**.
 
 ---
 
-# 📜 Licence
+#  Licence
 
 Projet académique réalisé à des fins éducatives.
 
 ---
 
-⭐ Si ce projet vous intéresse, n'hésitez pas à explorer le dépôt !
+Si ce projet vous intéresse, n'hésitez pas à explorer le dépôt !
 
 
