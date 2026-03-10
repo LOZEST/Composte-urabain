@@ -198,6 +198,8 @@ Documentation technique
 Présentation du projet 
 👉 [Accéder au dossier Presentation](./Presentation)
 
+📊 [Composants du projet](./Documentation/exels/budget.xlsx)
+
 #  Équipe
 
 Projet réalisé par :
