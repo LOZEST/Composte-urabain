@@ -170,7 +170,7 @@ Greenloop/
 │
 ├── Documentation/
 │   ├── exel/
-│         └──liste des composants.xlsx
+│   └── sysml/
 │
 └── Presentation/
     ├── powerpoint/
@@ -198,7 +198,6 @@ Documentation technique
 Présentation du projet 
 👉 [Accéder au dossier Presentation](./Presentation)
 
-📊 [Composants du projet](./Documentation/exels/budget.xlsx)
 
 #  Équipe
 
