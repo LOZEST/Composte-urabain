@@ -155,9 +155,9 @@ Greenloop/
 ├── README.md
 │
 ├── Soutien/
-│   ├── pitch_projet.pdf
-│   ├── dossier_partenaire.pdf
-│   └── notes_orales.md
+│   ├── mairies
+│   ├── entreprises
+│   └── 
 │
 ├── Code/
 │   ├── capteurs/
@@ -165,16 +165,16 @@ Greenloop/
 │   └── trackeur_solaire/
 │
 ├── CAO/
-│   ├── modele_maison/
-│   └── modele_cuves/
+│   ├── mode_maison/
+│   └── mode_cuves/
 │
 ├── Documentation/
 │   ├── dossier_technique.pdf
 │   └── sysml/
 │
 └── Presentation/
-    ├── diaporama_osi.pdf
-    ├── affiche_projet.png
+    ├── powerpoint
+    ├── 
     └── demo_projet.mp4
 
 ```
