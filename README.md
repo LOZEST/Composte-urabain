@@ -182,19 +182,19 @@ Greenloop/
 ---
 Voici un accès direct aux différentes ressources du projet :
 
-🤝 Documents de soutien  
+ Documents de soutien  
 👉 [Accéder au dossier Soutien](./Soutien)
 
-💻 Codes du projet  
+ Codes du projet  
 👉 [Accéder au dossier Code](./Code)
 
-🧩 Conception 3D (CAO)  
+ Conception 3D (CAO)  
 👉 [Accéder au dossier CAO](./CAO)
 
-📑 Documentation technique  
+ Documentation technique  
 👉 [Accéder au dossier Documentation](./Documentation)
 
-🎤 Présentation du projet  
+ Présentation du projet  
 👉 [Accéder au dossier Presentation](./Presentation)
 
 ---
