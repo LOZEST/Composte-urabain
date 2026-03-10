@@ -1,6 +1,5 @@
 #  Greenloop — Composteur Urbain Autonome (OSI 2026)
 
-https://www.ecosia.org/search?q=%3Cimg+src%3D%22https%3A%2F%2Fgithub.com%2Fuser-attachments%2Fassets%2F5566e445-7e59-4c4f-8d6f-80ce420a6304%22+width%3D%22250%22+align%3D%22right%22+%2F%3E&addon=chromegpo
 
 ![Projet](https://img.shields.io/badge/Projet-Olympiades%20SI%202026-green)
 ![Plateforme](https://img.shields.io/badge/Plateforme-Arduino-blue)
