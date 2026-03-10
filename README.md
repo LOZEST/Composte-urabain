@@ -49,13 +49,13 @@ Ouverture de la trappe via scan de QR Code.
 Mesure du poids des biodéchets déposés.
 
  **Cycle de compostage intelligent**
-Gestion de plusieurs états de décomposition.
+Gestion de plusieurs états de décomposition via plusieurs cuves sous-terraines.
 
  **Autonomie énergétique**
-Système alimenté par panneau solaire.
+Système alimenté par un trackeur solaire.
 
  **Suivi des données**
-Possibilité d'analyser les apports et l'utilisation.
+Donées disponible sur une application connécté en temps réel.
 
 ---
 
@@ -72,11 +72,11 @@ Possibilité d'analyser les apports et l'utilisation.
 
 Le prototype intègre :
 
-* une **trappe motorisée**
+* un **scanner qrcode**
 * un **système de pesée**
 * un **microcontrôleur Arduino**
 * un **panneau solaire et une batterie**
-* un **châssis modélisé en 3D**
+* un **modélisation en 3D**
 
 ### Aperçu
 
@@ -96,10 +96,9 @@ Le système repose sur deux chaînes principales :
 
 Capteurs → Microcontrôleur → Traitement → Actionneurs
 
-Exemples :
 
-* capteur de poids
 * lecture du QR code
+* capteur de poids
 * traitement Arduino
 * commande du servomoteur
 
@@ -123,17 +122,24 @@ Le projet mobilise plusieurs domaines d'ingénierie :
 
 ### Conception 3D
 
-Modélisation du châssis et de la trappe avec **Fusion 360**.
+Modélisation de l'ensemble depots de déchets et retrait de dechets, 
+modélisation enssemble des 4 cuves de stockages sous-terraines avec **Fusion 360**.
 
-Fabrication de certaines pièces en **impression 3D**.
+puis **impression 3D**.
 
 ### Électronique et programmation
 
 Pilotage du système avec **Arduino** :
 
-* servomoteurs
-* capteurs 
-* gestion de l'énergie
+* capteurs pression
+* capteurs qualité d'air
+* capteur gaz
+* capteur himidité
+* poulie
+* Sérure éléctro-magnétique
+* scanner qrcode
+* trackeur solaire
+
 
 ### Gestion de projet
 
