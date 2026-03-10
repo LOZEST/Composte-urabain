@@ -1,37 +1,207 @@
-#  Greenloop — Composteur Urbain Autonome (OSI 2026)
+# 🌱 Greenloop — Composteur Urbain Autonome (OSI 2026)
 
-<img src="https://github.com/user-attachments/assets/5566e445-7e59-4c4f-8d6f-80ce420a6304" width="250" align="right" />
+https://www.ecosia.org/search?q=%3Cimg+src%3D%22https%3A%2F%2Fgithub.com%2Fuser-attachments%2Fassets%2F5566e445-7e59-4c4f-8d6f-80ce420a6304%22+width%3D%22250%22+align%3D%22right%22+%2F%3E&addon=chromegpo
 
-**Greenloop** est notre projet pour les Olympiades des Sciences de l'Ingénieur. L'objectif : concevoir un composteur intelligent et 100% autonome capable de transformer les biodéchets en ressource locale, directement en ville.
+![Projet](https://img.shields.io/badge/Projet-Olympiades%20SI%202026-green)
+![Plateforme](https://img.shields.io/badge/Plateforme-Arduino-blue)
+![Énergie](https://img.shields.io/badge/Énergie-Solaire-yellow)
+![Statut](https://img.shields.io/badge/Statut-En%20développement-orange)
 
----
+<img src="https://github.com/user-attachments/assets/5566e445-7e59-4c4f-8d6f-80ce420a6304" width="300" align="right" />
 
-##  Le Concept
-L'idée est de simplifier le compostage urbain en levant les freins habituels (odeurs, gestion complexe, accès libre). 
-* **Accès sécurisé :** Ouverture de la trappe par scan de QR Code.
-* **Suivi intelligent :** Pesée automatique des apports pour récolter des stats précises.
-* **Cycle géré :** Le système gère le passage des déchets à travers 3 états de décomposition.
-* **Zéro branchement :** Entièrement alimenté par panneau solaire.
+**Greenloop** est un projet développé dans le cadre des **Olympiades des Sciences de l'Ingénieur 2026**.
 
-##  Notre approche technique
-Pour ce projet, on a dû toucher à tout :
-* **Ingénierie & SysML :** Analyse du besoin, diagrammes de blocs (chaîne d'énergie/info) et calculs de dimensionnement solaire.
-* **Conception 3D :** Modélisation de la trappe et du châssis sur **Fusion 360**, avec des pièces réalisées en impression 3D.
-* **Électronique & Code :** Pilotage via **Arduino** (servomoteurs, capteurs de pression/load cells, gestion de la batterie).
-* **Data :** Suivi du budget et des composants via Excel.
-
-##  L'équipe (TK 2026)
-Projet réalisé par : 
-**Louis Giraudel, Lucien Bisiaux, Eliot Farys, Théophile Berenger et Clément Hintzy.**
+L'objectif est de concevoir un **composteur urbain intelligent et autonome**, capable de transformer les biodéchets en ressource locale directement en ville, tout en simplifiant l'utilisation pour les citoyens.
 
 ---
 
-##  Contenu du dépôt
-* `/Code` : Scripts Arduino pour la gestion des cycles et de la trappe.
-* `/CAO` : Fichiers de conception 3D et rendus Fusion 360.
-* `/Documentation` : Dossier technique, SysML et étude énergétique.
+# 📑 Sommaire
+
+* [Le concept](#-le-concept)
+* [Objectifs du projet](#-objectifs-du-projet)
+* [Prototype](#-prototype)
+* [Architecture système](#-architecture-système)
+* [Approche technique](#-approche-technique)
+* [Structure du projet](#-structure-du-projet)
+* [Contenu du dépôt](#-contenu-du-dépôt)
+* [Équipe](#-équipe)
+* [Licence](#-licence)
 
 ---
-*Projet développé dans le cadre des Olympiades des Sciences de l'Ingénieur.*
+
+# 🌍 Le concept
+
+Le projet **Greenloop** vise à rendre le **compostage urbain simple, accessible et autonome**.
+
+Les composteurs urbains existants présentent plusieurs limites :
+
+* gestion complexe
+* odeurs
+* accès non contrôlé
+* absence de données sur l'utilisation
+
+Greenloop apporte une solution en intégrant **automatisation, capteurs et énergie solaire**.
+
+### Fonctionnalités principales
+
+♻️ **Accès sécurisé**
+Ouverture de la trappe via scan de QR Code.
+
+⚖️ **Pesée automatique**
+Mesure du poids des biodéchets déposés.
+
+🔄 **Cycle de compostage intelligent**
+Gestion de plusieurs états de décomposition.
+
+☀️ **Autonomie énergétique**
+Système alimenté par panneau solaire.
+
+📊 **Suivi des données**
+Possibilité d'analyser les apports et l'utilisation.
+
 ---
+
+# 🎯 Objectifs du projet
+
+* Encourager le **tri des biodéchets en ville**
+* Simplifier l'utilisation du compostage collectif
+* Produire un **système autonome et durable**
+* Collecter des **données d'utilisation**
+
+---
+
+# 🧪 Prototype
+
+Le prototype intègre :
+
+* une **trappe motorisée**
+* un **système de pesée**
+* un **microcontrôleur Arduino**
+* un **panneau solaire et une batterie**
+* un **châssis modélisé en 3D**
+
+### Aperçu
+
+*(Vous pouvez ajouter ici des photos du prototype ou des rendus CAO)*
+
+```markdown
+![Prototype](images/prototype.jpg)
+```
+
+---
+
+# ⚙️ Architecture système
+
+Le système repose sur deux chaînes principales :
+
+### Chaîne d'information
+
+Capteurs → Microcontrôleur → Traitement → Actionneurs
+
+Exemples :
+
+* capteur de poids
+* lecture du QR code
+* traitement Arduino
+* commande du servomoteur
+
+### Chaîne d'énergie
+
+Panneau solaire → Batterie → Régulateur → Arduino + moteurs
+
+Cela permet un **fonctionnement totalement autonome**.
+
+---
+
+# 🛠 Approche technique
+
+Le projet mobilise plusieurs domaines d'ingénierie :
+
+### Ingénierie système
+
+* analyse du besoin
+* diagrammes SysML
+* architecture fonctionnelle
+
+### Conception 3D
+
+Modélisation du châssis et de la trappe avec **Fusion 360**.
+
+Fabrication de certaines pièces en **impression 3D**.
+
+### Électronique et programmation
+
+Pilotage du système avec **Arduino** :
+
+* servomoteurs
+* capteurs de pression (load cells)
+* gestion de l'énergie
+
+### Gestion de projet
+
+Suivi du budget et des composants avec **Excel**.
+
+---
+
+# 📂 Structure du projet
+
+```text
+Greenloop/
+│
+├── README.md
+│
+├── Code/
+│   ├── gestion_trappe.ino
+│   ├── capteur_poids.ino
+│   └── cycle_compost.ino
+│
+├── CAO/
+│   ├── modele_trappe.f3d
+│   └── rendus/
+│
+└── Documentation/
+    ├── dossier_technique.pdf
+    ├── sysml/
+    └── etude_energetique.pdf
+```
+
+---
+
+# 📁 Contenu du dépôt
+
+Accès direct aux ressources du projet :
+
+💻 **Codes Arduino**
+👉 [Accéder au dossier Code](./Code)
+
+🧩 **Conception 3D (CAO)**
+👉 [Accéder au dossier CAO](./CAO)
+
+📑 **Documentation technique**
+👉 [Accéder au dossier Documentation](./Documentation)
+
+---
+
+# 👥 Équipe
+
+Projet réalisé par :
+
+* **Louis Giraudel**
+* **Lucien Bisiaux**
+* **Eliot Farys**
+* **Théophile Berenger**
+* **Clément Hintzy**
+
+Dans le cadre des **Olympiades des Sciences de l’Ingénieur 2026**.
+
+---
+
+# 📜 Licence
+
+Projet académique réalisé à des fins éducatives.
+
+---
+
+⭐ Si ce projet vous intéresse, n'hésitez pas à explorer le dépôt !
+
 
