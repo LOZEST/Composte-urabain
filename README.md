@@ -155,8 +155,8 @@ Greenloop/
 ├── README.md
 │
 ├── Soutien/
-│   ├── mairies
-│   ├── entreprises
+│   ├── mairies/
+│   ├── entreprises/
 │   └── 
 │
 ├── Code/
@@ -169,11 +169,11 @@ Greenloop/
 │   └── mode_cuves/
 │
 ├── Documentation/
-│   ├── dossier_technique.pdf
+│   ├── exels/
 │   └── sysml/
 │
 └── Presentation/
-    ├── powerpoint
+    ├── powerpoint/
     ├── 
     └── demo_projet.mp4
 
