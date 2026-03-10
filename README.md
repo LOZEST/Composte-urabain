@@ -22,7 +22,6 @@ L'objectif est de concevoir un **composteur urbain intelligent et autonome**, ca
 * [Architecture système](#-architecture-système)
 * [Approche technique](#-approche-technique)
 * [Structure du projet](#-structure-du-projet)
-* [Contenu du dépôt](#-contenu-du-dépôt)
 * [Équipe](#-équipe)
 * [Licence](#-licence)
 
@@ -112,7 +111,7 @@ Cela permet un **fonctionnement totalement autonome**.
 
 ---
 
-# 🛠 Approche technique
+#  Approche technique
 
 Le projet mobilise plusieurs domaines d'ingénierie :
 
@@ -133,7 +132,7 @@ Fabrication de certaines pièces en **impression 3D**.
 Pilotage du système avec **Arduino** :
 
 * servomoteurs
-* capteurs de pression (load cells)
+* capteurs 
 * gestion de l'énergie
 
 ### Gestion de projet
@@ -149,35 +148,48 @@ Greenloop/
 │
 ├── README.md
 │
+├── Soutien/
+│   ├── pitch_projet.pdf
+│   ├── dossier_partenaire.pdf
+│   └── notes_orales.md
+│
 ├── Code/
-│   ├── gestion_trappe.ino
-│   ├── capteur_poids.ino
-│   └── cycle_compost.ino
+│   ├── capteurs/
+│   ├── appli/
+│   └── trackeur_solaire/
 │
 ├── CAO/
-│   ├── modele_trappe.f3d
-│   └── rendus/
+│   ├── modele_maison/
+│   └── modele_cuves/
 │
-└── Documentation/
-    ├── dossier_technique.pdf
-    ├── sysml/
-    └── etude_energetique.pdf
+├── Documentation/
+│   ├── dossier_technique.pdf
+│   └── sysml/
+│
+└── Presentation/
+    ├── diaporama_osi.pdf
+    ├── affiche_projet.png
+    └── demo_projet.mp4
+
 ```
 
 ---
+Voici un accès direct aux différentes ressources du projet :
 
-#  Contenu du dépôt
+🤝 Documents de soutien  
+👉 [Accéder au dossier Soutien](./Soutien)
 
-Accès direct aux ressources du projet :
+💻 Codes du projet  
+👉 [Accéder au dossier Code](./Code)
 
- **Codes Arduino**
- [Accéder au dossier Code](./Code)
+🧩 Conception 3D (CAO)  
+👉 [Accéder au dossier CAO](./CAO)
 
- **Conception 3D (CAO)**
- [Accéder au dossier CAO](./CAO)
+📑 Documentation technique  
+👉 [Accéder au dossier Documentation](./Documentation)
 
- **Documentation technique**
- [Accéder au dossier Documentation](./Documentation)
+🎤 Présentation du projet  
+👉 [Accéder au dossier Presentation](./Presentation)
 
 ---
 
