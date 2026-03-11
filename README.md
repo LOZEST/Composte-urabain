@@ -203,9 +203,9 @@ Présentation du projet
 
 Projet réalisé par :
 
+* **Eliot Farys**
 * **Louis Giraudel**
 * **Lucien Bisiaux**
-* **Eliot Farys**
 * **Théophile Berenger**
 * **Clément Hintzy**
 
