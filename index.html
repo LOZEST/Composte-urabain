@@ -698,9 +698,211 @@
       .hero-logo { width: 104px; height: 104px; }
       .timeline-row { grid-template-columns: 1fr; }
     }
+  
+    .hero h1,
+    .section-head h2,
+    .cta h2,
+    .hero-quote,
+    .card,
+    .member,
+    .panel,
+    .stack-box,
+    .timeline-row,
+    .device-item,
+    .hero-points span,
+    .badge {
+      will-change: transform, opacity;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .8s ease, transform .8s ease;
+    }
+
+    .reveal.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.68);
+      color: var(--green-3);
+      font-size: .84rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border: 1px solid rgba(13,42,24,.06);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-label::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #71c56c, #227c45);
+      box-shadow: 0 0 0 4px rgba(115,194,109,.12);
+    }
+
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 16px;
+      margin: 10px 0 8px;
+    }
+
+    .stat-card {
+      padding: 22px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.62));
+      border: 1px solid rgba(255,255,255,.74);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: .95;
+      letter-spacing: -.07em;
+      margin-bottom: 8px;
+    }
+
+    .stat-card span { color: var(--muted); line-height: 1.6; }
+
+    .impact-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .comparison .mini-card {
+      min-height: 160px;
+    }
+
+    .comparison .mini-card em {
+      display: inline-block;
+      margin-bottom: 10px;
+      font-style: normal;
+      font-size: .76rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--green-3);
+    }
+
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 16px;
+    }
+
+    .process-step {
+      position: relative;
+      padding: 22px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,.84), rgba(255,255,255,.62));
+      border: 1px solid rgba(255,255,255,.74);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .process-step::after {
+      content: attr(data-step);
+      position: absolute;
+      right: 16px;
+      top: 12px;
+      font-size: 3rem;
+      line-height: 1;
+      letter-spacing: -.08em;
+      color: rgba(45,143,80,.08);
+      font-weight: 700;
+    }
+
+    .process-step h3 {
+      margin: 12px 0 8px;
+      font-size: 1.08rem;
+      letter-spacing: -.03em;
+    }
+
+    .faq {
+      display: grid;
+      gap: 14px;
+    }
+
+    .faq details {
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.60));
+      border: 1px solid rgba(255,255,255,.72);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 20px;
+    }
+
+    .faq summary {
+      cursor: pointer;
+      list-style: none;
+      font-weight: 600;
+      letter-spacing: -.02em;
+    }
+
+    .faq summary::-webkit-details-marker { display: none; }
+
+    .faq details p {
+      margin: 14px 0 0;
+      color: var(--muted);
+      line-height: 1.72;
+    }
+
+    .subtle-line {
+      height: 1px;
+      border: 0;
+      background: linear-gradient(90deg, transparent, rgba(13,42,24,.08), transparent);
+      margin: 10px 0 0;
+    }
+
+    .top-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      z-index: 100;
+      background: linear-gradient(90deg, #71c56c, #227c45);
+      box-shadow: 0 0 18px rgba(45,143,80,.35);
+    }
+
+    @media (max-width: 1180px) {
+      .stats-strip,
+      .process-grid,
+      .impact-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 780px) {
+      .stats-strip,
+      .process-grid,
+      .impact-grid,
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="top-progress" id="topProgress"></div>
   <header class="topbar glass">
     <a class="brand" href="#top">
       <img src="https://raw.githubusercontent.com/LOZEST/Composte-urabain/main/Logo%20green%20loop.JPG" alt="Logo GreenLoop" />
@@ -712,8 +914,10 @@
     <nav class="nav">
       <a href="#vision">Vision</a>
       <a href="#solution">Solution</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#prototype">Prototype</a>
+      <a href="#code">Code</a>
+      <a href="#app">Application</a>
+      <a href="#modelisation">Modélisation</a>
+      <a href="#soutien">Soutien</a>
       <a href="#team">Équipe</a>
     </nav>
     <a class="btn-secondary" href="https://github.com/LOZEST/Composte-urabain" target="_blank" rel="noreferrer">Voir le GitHub</a>
@@ -721,6 +925,7 @@
 
   <main class="container" id="top">
     <section class="hero">
+      <div class="reveal">
       <div>
         <div class="badge">Composteur urbain autonome · Projet GreenLoop</div>
         <h1>Le compostage urbain, rendu clair, simple et désirable.</h1>
@@ -739,6 +944,7 @@
           <span>Pesée automatique</span>
           <span>Énergie solaire</span>
           <span>Données en temps réel</span>
+          <span>Architecture système</span>
         </div>
       </div>
 
@@ -793,11 +999,24 @@
           </div>
         </div>
       </div>
+    </div>
+    </section>
+
+    <section>
+      <div class="stats-strip reveal">
+        <article class="stat-card"><strong>5</strong><span>auteurs engagés autour d’un projet commun, technique et ambitieux.</span></article>
+        <article class="stat-card"><strong>1</strong><span>vision claire : rendre le compostage urbain plus simple, mieux suivi et plus désirable.</span></article>
+        <article class="stat-card"><strong>4</strong><span>piliers clés : accès, mesure, autonomie énergétique et suivi des données.</span></article>
+        <article class="stat-card"><strong>360°</strong><span>une approche système mêlant design, électronique, architecture et usage réel.</span></article>
+      </div>
     </section>
 
     <section id="vision">
-      <div class="section-head">
-        <h2>Une réponse claire à un problème concret.</h2>
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Pourquoi GreenLoop</div>
+          <h2>Une réponse claire à un problème concret.</h2>
+        </div>
         <p>
           En ville, le compostage collectif souffre souvent des mêmes limites : usage perçu comme complexe,
           odeurs, accès non contrôlé, manque de visibilité sur l’utilisation réelle et faible lisibilité du système.
@@ -805,42 +1024,77 @@
         </p>
       </div>
 
-      <div class="grid-4">
+      <div class="grid-4 reveal">
         <article class="card">
-          <div class="icon">🌆</div>
+          <div class="icon">01</div>
           <h3>Penser la ville</h3>
           <p>Le projet ne parle pas seulement de compost : il parle de logistique urbaine, d’usage citoyen et de boucle locale.</p>
         </article>
         <article class="card quote-card">
-          <div class="icon">🪶</div>
+          <div class="icon">02</div>
           <h3>Rendre simple</h3>
           <p>Le meilleur système est celui qu’on comprend vite. GreenLoop allège l’expérience et clarifie l’action.</p>
         </article>
         <article class="card">
-          <div class="icon">🔒</div>
+          <div class="icon">03</div>
           <h3>Mieux contrôler</h3>
           <p>Un accès maîtrisé et des interactions mesurées permettent un usage collectif plus fiable.</p>
         </article>
         <article class="card">
-          <div class="icon">🌱</div>
+          <div class="icon">04</div>
           <h3>Valoriser localement</h3>
           <p>Les biodéchets redeviennent une ressource au plus près de leur lieu de production.</p>
         </article>
       </div>
     </section>
 
+    <section>
+      <div class="impact-grid">
+        <article class="card reveal">
+          <div class="section-label">Avant / après</div>
+          <h3>Le projet change la manière de raconter le compostage collectif.</h3>
+          <div class="comparison">
+            <div class="mini-card">
+              <em>Avant</em>
+              <strong>Un geste peu lisible</strong>
+              <p>Utilisation floue, faible visibilité sur l’impact, suivi compliqué, expérience peu attractive pour un usage urbain partagé.</p>
+            </div>
+            <div class="mini-card">
+              <em>Après</em>
+              <strong>Une boucle locale pilotée</strong>
+              <p>Accès structuré, mesure concrète, données visibles et lecture plus claire d’un système réellement pensé pour la ville.</p>
+            </div>
+          </div>
+        </article>
+        <article class="card reveal">
+          <div class="section-label">Promesse</div>
+          <h3>Un objet utile qui inspire confiance.</h3>
+          <p>GreenLoop ne cherche pas seulement à fonctionner : il cherche aussi à être compris, accepté et adopté. C’est ce qui donne sa force au projet.</p>
+          <hr class="subtle-line" />
+          <div class="device-list" style="margin-top:18px;">
+            <div class="device-item"><span class="bullet"></span><div><strong>Plus visible</strong><br><span>Le geste citoyen devient mesurable et racontable.</span></div></div>
+            <div class="device-item"><span class="bullet"></span><div><strong>Plus crédible</strong><br><span>Le système repose sur une vraie architecture technique.</span></div></div>
+            <div class="device-item"><span class="bullet"></span><div><strong>Plus inspirant</strong><br><span>Le design valorise une innovation locale et concrète.</span></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section id="solution">
-      <div class="section-head">
-        <h2>Une solution plus intelligente, sans rendre le sujet compliqué.</h2>
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">La solution</div>
+          <h2>Une solution plus intelligente, sans rendre le sujet compliqué.</h2>
+        </div>
         <p>
           Toute l’idée de ce site est de présenter GreenLoop comme un système cohérent : lisible pour le grand public,
           crédible pour un jury, et suffisamment détaillé pour montrer la profondeur technique du projet.
         </p>
       </div>
 
-      <div class="feature-big">
+      <div class="feature-big reveal">
         <article class="card">
-          <div class="icon">✨</div>
+          <div class="icon">A</div>
           <h3>Ce que GreenLoop apporte</h3>
           <div class="timeline">
             <div class="timeline-row"><strong>Accès sécurisé</strong><div>Ouverture de la trappe via scan de QR code pour simplifier l’usage tout en gardant un contrôle clair des accès.</div></div>
@@ -862,17 +1116,36 @@
       </div>
     </section>
 
+    <section>
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Parcours</div>
+          <h2>Le fonctionnement en quatre étapes.</h2>
+        </div>
+        <p>Cette séquence rend le projet très lisible sur le site : de l’arrivée de l’utilisateur jusqu’au pilotage du système.</p>
+      </div>
+      <div class="process-grid reveal">
+        <article class="process-step" data-step="01"><div class="icon">1</div><h3>S’identifier</h3><p>L’utilisateur scanne son QR code pour déclencher une interaction simple et contrôlée.</p></article>
+        <article class="process-step" data-step="02"><div class="icon">2</div><h3>Déposer</h3><p>Le biodéchet est déposé dans un parcours guidé, pensé pour rester compréhensible et propre.</p></article>
+        <article class="process-step" data-step="03"><div class="icon">3</div><h3>Mesurer et piloter</h3><p>Le système lit, traite et agit grâce aux capteurs, à l’Arduino et aux actionneurs.</p></article>
+        <article class="process-step" data-step="04"><div class="icon">4</div><h3>Suivre l’impact</h3><p>Les données deviennent utiles pour montrer l’usage réel, améliorer le projet et valoriser l’impact local.</p></article>
+      </div>
+    </section>
+
     <section id="architecture">
-      <div class="section-head">
-        <h2>Une architecture système pensée pour être comprise d’un coup d’œil.</h2>
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Architecture</div>
+          <h2>Une architecture système pensée pour être comprise d’un coup d’œil.</h2>
+        </div>
         <p>
           GreenLoop mobilise à la fois l’ingénierie système, la conception 3D, l’électronique, la programmation et la gestion de projet. Le site réorganise ces sujets de manière plus claire et plus fluide.
         </p>
       </div>
 
-      <div class="grid-2">
+      <div class="grid-2 reveal">
         <article class="card">
-          <div class="icon">🛰️</div>
+          <div class="icon">CI</div>
           <h3>Chaîne d’information</h3>
           <p>Capteurs, lecture, traitement puis action : une logique simple à montrer, essentielle pour rendre le projet pédagogique.</p>
           <div class="flow">
@@ -890,7 +1163,7 @@
         </article>
 
         <article class="card">
-          <div class="icon">☀️</div>
+          <div class="icon">CE</div>
           <h3>Chaîne d’énergie</h3>
           <p>Le projet met en avant un fonctionnement autonome grâce à la conversion et la distribution d’énergie solaire.</p>
           <div class="flow">
@@ -908,19 +1181,19 @@
         </article>
       </div>
 
-      <div class="grid-3" style="margin-top:18px;">
+      <div class="grid-3 reveal" style="margin-top:18px;">
         <article class="card">
-          <div class="icon">📐</div>
+          <div class="icon">IS</div>
           <h3>Ingénierie système</h3>
           <p>Analyse du besoin, diagrammes SysML et architecture fonctionnelle structurent l’ensemble du projet.</p>
         </article>
         <article class="card">
-          <div class="icon">🧱</div>
+          <div class="icon">3D</div>
           <h3>Conception 3D</h3>
           <p>Modélisation des dépôts, des cuves de stockage sous-terraines et des éléments mécaniques, avant passage au prototype.</p>
         </article>
         <article class="card">
-          <div class="icon">🔬</div>
+          <div class="icon">EL</div>
           <h3>Électronique & capteurs</h3>
           <p>Pression, qualité d’air, gaz, humidité, serrure électromagnétique, QR code et trackeur solaire composent un ensemble ambitieux et cohérent.</p>
         </article>
@@ -928,17 +1201,20 @@
     </section>
 
     <section id="prototype">
-      <div class="section-head">
-        <h2>Du concept au prototype.</h2>
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Prototype</div>
+          <h2>Du concept au prototype.</h2>
+        </div>
         <p>
           Le dépôt décrit un prototype intégrant scanner QR code, système de pesée, microcontrôleur Arduino,
           panneau solaire, batterie et modélisation 3D. Cette page met ces briques en scène de manière plus lisible et plus premium.
         </p>
       </div>
 
-      <div class="grid-2">
+      <div class="grid-2 reveal">
         <article class="card">
-          <div class="icon">🧩</div>
+          <div class="icon">PX</div>
           <h3>Le prototype intègre</h3>
           <div class="timeline">
             <div class="timeline-row"><strong>Scanner QR</strong><div>Point d’entrée simple pour contrôler l’ouverture et fluidifier l’expérience utilisateur.</div></div>
@@ -949,7 +1225,7 @@
         </article>
 
         <article class="card quote-card">
-          <div class="icon">🎯</div>
+          <div class="icon">UX</div>
           <h3>Pourquoi ce site est utile</h3>
           <p>
             Un bon projet mérite une bonne lecture. Ce site a été conçu pour transformer un dépôt technique en une vitrine claire, élégante et persuasive : utile pour présenter GreenLoop à un jury, à des partenaires, à une mairie ou à un public plus large.
@@ -958,15 +1234,167 @@
       </div>
     </section>
 
+    <section>
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Questions fréquentes</div>
+          <h2>Ce qu’il faut comprendre en un instant.</h2>
+        </div>
+        <p>Une section FAQ renforce le côté clair, pédagogique et rassurant du site, surtout pour un jury ou un visiteur extérieur au projet.</p>
+      </div>
+      <div class="faq reveal">
+        <details open>
+          <summary>En quoi GreenLoop se distingue-t-il d’un composteur classique ?</summary>
+          <p>Le projet ajoute une logique de contrôle d’accès, de mesure, d’autonomie énergétique et de suivi des données qui rend l’ensemble plus lisible et mieux pilotable.</p>
+        </details>
+        <details>
+          <summary>Pourquoi le QR code et la pesée sont importants ?</summary>
+          <p>Parce qu’ils transforment un usage collectif souvent flou en un parcours structuré, observable et plus crédible à grande échelle.</p>
+        </details>
+        <details>
+          <summary>Pourquoi ce site est plus fort que le dépôt seul ?</summary>
+          <p>Parce qu’il réorganise les idées, hiérarchise les informations et donne immédiatement une lecture premium de la vision, du prototype et de l’architecture système.</p>
+        </details>
+      </div>
+    </section>
+
+    <section id="code">
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Page projet</div>
+          <h2>Le code.</h2>
+        </div>
+        <p>Cette partie présente le cœur technique du dépôt. Elle explique ce que le code pilote, comment il s’organise et pourquoi il est essentiel dans la crédibilité du projet.</p>
+      </div>
+
+      <div class="grid-2 reveal">
+        <article class="card">
+          <div class="icon">AR</div>
+          <h3>Logique embarquée</h3>
+          <p>Le code relie la lecture du QR code, la mesure des apports, le traitement des données et l’action sur les composants mécaniques. Il donne au prototype sa cohérence fonctionnelle et transforme une suite de composants en système réellement piloté.</p>
+        </article>
+        <article class="card">
+          <div class="icon">ST</div>
+          <h3>Structure du dépôt</h3>
+          <p>Le projet rassemble plusieurs briques : programmation des capteurs, logique Arduino, suivi applicatif, éléments liés au trackeur solaire et documents techniques. Le site clarifie cette structure pour permettre à un visiteur de comprendre rapidement où se trouvent les différentes dimensions du travail.</p>
+        </article>
+      </div>
+
+      <div class="grid-3 reveal" style="margin-top:18px;">
+        <article class="card">
+          <div class="icon">Q1</div>
+          <h3>Lecture et contrôle d’accès</h3>
+          <p>Le code gère l’identification par QR code pour sécuriser l’usage et introduire une logique d’interaction claire entre l’utilisateur et la machine.</p>
+        </article>
+        <article class="card">
+          <div class="icon">Q2</div>
+          <h3>Mesure et traitement</h3>
+          <p>Les informations issues de la pesée et des capteurs sont interprétées pour guider le comportement du système et alimenter le suivi global du composteur.</p>
+        </article>
+        <article class="card">
+          <div class="icon">Q3</div>
+          <h3>Action et automatisation</h3>
+          <p>Le logiciel pilote les actionneurs et accompagne les états de fonctionnement du prototype, dans une logique d’automatisation progressive.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="app">
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Page projet</div>
+          <h2>L’application.</h2>
+        </div>
+        <p>Le site développe davantage l’idée d’une application connectée, non comme un accessoire, mais comme un outil de lecture, de suivi et de valorisation du système.</p>
+      </div>
+
+      <div class="feature-big reveal">
+        <article class="card">
+          <div class="icon">AP</div>
+          <h3>Une interface de compréhension</h3>
+          <p>L’application a pour rôle de rendre le composteur lisible. Elle peut afficher les apports, l’état du système, les cycles, les données utiles et la participation. Cette couche de visualisation est essentielle, car elle transforme un dispositif technique en service compréhensible pour l’usager.</p>
+          <div class="timeline">
+            <div class="timeline-row"><strong>Suivre</strong><div>Visualiser l’activité du système et l’évolution des dépôts.</div></div>
+            <div class="timeline-row"><strong>Comprendre</strong><div>Rendre les données accessibles à un public non technique.</div></div>
+            <div class="timeline-row"><strong>Valoriser</strong><div>Montrer l’impact local et la participation réelle des utilisateurs.</div></div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="icon">UI</div>
+          <h3>Une extension naturelle du projet</h3>
+          <p>Dans la logique du site, l’application devient une page à part entière. Elle montre que GreenLoop ne s’arrête pas à un prototype physique : il s’agit aussi d’une expérience de consultation, de pédagogie et de suivi. Cela donne au projet une dimension plus contemporaine et plus complète.</p>
+          <div class="device-list" style="margin-top:18px;">
+            <div class="device-item"><span class="bullet"></span><div><strong>Lecture de l’activité</strong><br><span>Données d’usage et historique des dépôts.</span></div></div>
+            <div class="device-item"><span class="bullet"></span><div><strong>État du système</strong><br><span>Informations utiles sur le composteur et son cycle.</span></div></div>
+            <div class="device-item"><span class="bullet"></span><div><strong>Pédagogie</strong><br><span>Une façon simple d’expliquer le fonctionnement du projet.</span></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="modelisation">
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Page projet</div>
+          <h2>La modélisation.</h2>
+        </div>
+        <p>Cette page met en avant la conception 3D, l’architecture des cuves, l’intégration des composants et la manière dont l’idée devient un objet concret.</p>
+      </div>
+
+      <div class="grid-3 reveal">
+        <article class="card">
+          <div class="icon">3D</div>
+          <h3>Conception volumique</h3>
+          <p>La modélisation permet de définir les formes, l’encombrement, la disposition des organes et la cohérence de l’ensemble dans un contexte urbain.</p>
+        </article>
+        <article class="card">
+          <div class="icon">CV</div>
+          <h3>Organisation des cuves</h3>
+          <p>Le site explique plus clairement la logique des différentes cuves et des états de décomposition, afin de montrer que l’architecture physique fait partie intégrante du concept.</p>
+        </article>
+        <article class="card">
+          <div class="icon">IN</div>
+          <h3>Intégration technique</h3>
+          <p>La modélisation ne sert pas seulement à rendre l’objet beau. Elle sert à intégrer les composants, à vérifier les assemblages et à préparer le passage au prototype.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="soutien">
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Page projet</div>
+          <h2>Les soutiens.</h2>
+        </div>
+        <p>Cette partie donne une vraie place aux partenaires, aux appuis et au cadre du projet. Elle renforce la crédibilité globale du site et montre que GreenLoop s’inscrit dans une dynamique plus large.</p>
+      </div>
+
+      <div class="grid-2 reveal">
+        <article class="card">
+          <div class="icon">CA</div>
+          <h3>Cadre académique</h3>
+          <p>Le projet s’inscrit dans le cadre des Olympiades des Sciences de l’Ingénieur 2026. Cette origine donne au travail une base méthodologique claire et une exigence de qualité visible dans la structure du dépôt comme dans la construction du prototype.</p>
+        </article>
+        <article class="card">
+          <div class="icon">PA</div>
+          <h3>Partenaires et appuis</h3>
+          <p>La page peut accueillir les soutiens institutionnels, techniques ou matériels liés au projet. Elle permet aussi de remercier les personnes et structures qui ont contribué à sa progression.</p>
+        </article>
+      </div>
+    </section>
+
     <section id="team">
-      <div class="section-head">
-        <h2>Une équipe à l’origine de la vision GreenLoop.</h2>
+      <div class="section-head reveal">
+        <div>
+          <div class="section-label">Équipe</div>
+          <h2>Une équipe à l’origine de la vision GreenLoop.</h2>
+        </div>
         <p>
           Le projet est porté par cinq auteurs dans le cadre des Olympiades des Sciences de l’Ingénieur 2026. Ici, l’équipe est présentée avec sobriété, dans l’esprit d’une page produit premium.
         </p>
       </div>
 
-      <div class="team-grid">
+      <div class="team-grid reveal">
         <article class="member"><div class="avatar">LG</div><div><h3>Louis Giraudel</h3><p>Co-auteur du projet GreenLoop.</p></div></article>
         <article class="member"><div class="avatar">LB</div><div><h3>Lucien Bisiaux</h3><p>Co-auteur du projet GreenLoop.</p></div></article>
         <article class="member"><div class="avatar">EF</div><div><h3>Eliot Farys</h3><p>Co-auteur du projet GreenLoop.</p></div></article>
@@ -977,7 +1405,7 @@
     </section>
 
     <section>
-      <div class="cta">
+      <div class="cta reveal">
         <img src="https://raw.githubusercontent.com/LOZEST/Composte-urabain/main/Logo%20green%20loop.JPG" alt="Logo GreenLoop" />
         <h2>GreenLoop, maintenant prêt pour green-loop.website</h2>
         <p>
@@ -995,5 +1423,26 @@
       GreenLoop · green-loop.website · Composteur urbain autonome
     </footer>
   </main>
+  <script>
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add('in-view');
+      });
+    }, { threshold: 0.12 });
+
+    reveals.forEach((el) => observer.observe(el));
+
+    const topProgress = document.getElementById('topProgress');
+    const updateProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      topProgress.style.width = progress + '%';
+    };
+
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('load', updateProgress);
+  </script>
 </body>
 </html>
