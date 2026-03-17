@@ -78,15 +78,6 @@ Le prototype intègre :
 * un **panneau solaire et une batterie**
 * un **modélisation en 3D**
 
-### Aperçu
-
-*(Vous pouvez ajouter ici des photos du prototype ou des rendus CAO)*
-
-```markdown
-![Prototype](images/prototype.jpg)
-```
-
----
 
 #  Architecture système
 
