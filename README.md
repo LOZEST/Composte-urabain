@@ -15,16 +15,22 @@ L'objectif est de concevoir un **composteur urbain intelligent et autonome**, ca
 
 ---
 
-#  Sommaire
+Voici un accès direct aux différentes ressources du projet :
 
-* [Le concept](#-le-concept)
-* [Objectifs du projet](#-objectifs-du-projet)
-* [Prototype](#-prototype)
-* [Architecture système](#-architecture-système)
-* [Approche technique](#-approche-technique)
-* [Structure du projet](#-structure-du-projet)
-* [Équipe](#-équipe)
-* [Licence](#-licence)
+Documents de soutien 
+👉 [Accéder au dossier Soutien](./Soutien) 
+
+Codes du projet 
+👉 [Accéder au dossier Code](./Code) 
+
+Conception 3D (CAO) 
+👉 [Accéder au dossier CAO](./CAO) 
+
+Documentation technique 
+👉 [Accéder au dossier Documentation](./Documentation) 
+
+Présentation du projet 
+👉 [Accéder au dossier Presentation](./Presentation)
 
 ---
 
