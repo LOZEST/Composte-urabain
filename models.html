@@ -3,187 +3,263 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GreenLoop | Modèles 3D du composteur urbain</title>
-  <meta name="description" content="Explorez les modèles 3D GreenLoop du composteur urbain : visualisation interactive, conception CAO et structure du projet." />
-  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-  <link rel="canonical" href="https://green-loop.website/models.html" />
+  <title>GreenLoop — Modèles 3D</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="GreenLoop | Modèles 3D du composteur urbain" />
-  <meta property="og:description" content="Visualisez les modèles 3D GreenLoop directement en ligne." />
-  <meta property="og:url" content="https://green-loop.website/models.html" />
-  <meta property="og:image" content="https://green-loop.website/favicon.svg" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="GreenLoop | Modèles 3D du composteur urbain" />
-  <meta name="twitter:description" content="Page de visualisation 3D du projet GreenLoop." />
-  <meta name="twitter:image" content="https://green-loop.website/favicon.svg" />
   <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .models-page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 120px 24px 64px;
+    }
+
+    .viewer-card {
+      background: rgba(255,255,255,0.65);
+      border: 1px solid rgba(255,255,255,0.8);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .viewer-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .viewer-badges {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .viewer-badge {
+      padding: 12px 18px;
+      background: rgba(255,255,255,0.78);
+      border-radius: 999px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .model-stage {
+      width: 100%;
+      height: 620px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #f4faf3 0%, #edf4ef 100%);
+      border: 1px solid rgba(255,255,255,0.9);
+      position: relative;
+    }
+
+    #modelCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .model-status {
+      margin-top: 16px;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .model-actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .model-actions a {
+      display: inline-flex;
+      padding: 12px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid #d1d5db;
+      color: #111827;
+      background: #fff;
+    }
+
+    .model-actions a.primary {
+      background: #14532d;
+      color: #fff;
+      border-color: #14532d;
+    }
+
+    @media (max-width: 900px) {
+      .models-page {
+        padding: 96px 16px 40px;
+      }
+
+      .model-stage {
+        height: 420px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="top-progress" id="topProgress"></div>
-
   <header class="topbar">
-    <div class="container nav-inner">
-      <a class="brand" href="index_updated.html#presentation">
-        <img src="Logo green loop.JPG" alt="Logo GreenLoop" />
+    <div class="topbar-progress" id="topProgress"></div>
+    <div class="container nav">
+      <a href="index.html" class="brand" aria-label="Retour à l'accueil GreenLoop">
+        <img src="Logo green loop.JPG" alt="Logo GreenLoop" class="brand-logo" />
         <span>GreenLoop</span>
       </a>
 
-      <nav class="nav-links">
-        <a href="index_updated.html#presentation">Présentation</a>
-        <a href="index_updated.html#solution">Solution</a>
-        <a href="index_updated.html#conception">Conception</a>
-        <a href="models.html">Modèles 3D</a>
-        <a href="index_updated.html#soutiens">Soutiens</a>
-        <a href="https://github.com/LOZEST/Composte-urabain/tree/main/CAO" target="_blank" rel="noreferrer">Dossier CAO</a>
+      <nav class="nav-links" aria-label="Navigation principale">
+        <a href="index.html#presentation">Présentation</a>
+        <a href="index.html#solution">Solution</a>
+        <a href="index.html#conception">Conception</a>
+        <a href="models.html" aria-current="page">Modèles 3D</a>
+        <a href="index.html#soutiens">Soutiens</a>
+        <a href="https://github.com/LOZEST/Composte-urabain/tree/main/CAO" target="_blank" rel="noopener noreferrer">Dossier CAO</a>
       </nav>
     </div>
   </header>
 
-  <main>
-    <section class="hero models-hero" id="modeles-3d">
-      <div class="container hero-shell">
-        <span class="badge">CAO GreenLoop</span>
-        <h1 class="reveal">Visualiser les modèles 3D du projet.</h1>
-        <p class="lead reveal">
-          Cette page permet d’afficher les fichiers 3D disponibles dans le GitHub GreenLoop.
-          Le dépôt contient actuellement un modèle STL principal dans le dossier CAO.
-        </p>
-
-        <div class="models-grid">
-          <article class="model-viewer-card reveal">
-            <div class="model-viewer-stage">
-              <canvas id="modelCanvas" aria-label="Visualisation 3D du modèle GreenLoop"></canvas>
-              <div class="model-viewer-overlay">
-                <span class="model-chip">Rotation souris</span>
-                <span class="model-chip">Molette pour zoom</span>
-                <span class="model-chip">STL GitHub</span>
-              </div>
-            </div>
-          </article>
-
-          <aside class="model-info-card reveal">
-            <h3>Assemblage principal</h3>
-            <p>
-              Le visualiseur charge le fichier <strong>assemblage Final.stl</strong> directement depuis le dépôt GitHub.
-            </p>
-            <ul>
-              <li>Type de fichier : STL</li>
-              <li>Source : dossier <strong>CAO</strong></li>
-              <li>Usage : vue interactive du prototype</li>
-            </ul>
-
-            <div class="model-actions">
-              <a class="btn-primary" href="https://github.com/LOZEST/Composte-urabain/tree/main/CAO" target="_blank" rel="noreferrer">Ouvrir le dossier CAO</a>
-              <a class="btn-secondary" href="https://raw.githubusercontent.com/LOZEST/Composte-urabain/main/CAO/assemblage%20Final.stl" target="_blank" rel="noreferrer">Ouvrir le STL</a>
-            </div>
-
-            <div class="models-list">
-              <div class="model-list-item">
-                <strong>assemblage Final.stl</strong>
-                <span>Modèle 3D du composteur pour affichage web et consultation dans GitHub.</span>
-              </div>
-            </div>
-
-            <p class="model-note">
-              Si tu ajoutes d’autres fichiers STL, OBJ ou GLB dans GitHub, cette page peut être étendue pour afficher une galerie complète.
-            </p>
-          </aside>
+  <main class="models-page">
+    <section class="viewer-card">
+      <div class="viewer-toolbar">
+        <div>
+          <p class="eyebrow">CAO GREENLOOP</p>
+          <h1>Visualiser le modèle 3D</h1>
         </div>
+
+        <div class="viewer-badges">
+          <span class="viewer-badge">Rotation souris</span>
+          <span class="viewer-badge">Molette pour zoom</span>
+          <span class="viewer-badge">STL local</span>
+        </div>
+      </div>
+
+      <div class="model-stage">
+        <canvas id="modelCanvas"></canvas>
+      </div>
+
+      <div class="model-status" id="modelStatus">Chargement du modèle…</div>
+
+      <div class="model-actions">
+        <a href="CAO/assemblage-final.stl" target="_blank" rel="noopener noreferrer" class="primary">Ouvrir le STL</a>
+        <a href="https://github.com/LOZEST/Composte-urabain/tree/main/CAO" target="_blank" rel="noopener noreferrer">Ouvrir le dossier CAO</a>
       </div>
     </section>
   </main>
 
-  <footer>
-    &copy; 2026 GreenLoop — Modèles 3D
-  </footer>
+  <script src="script.js"></script>
 
-  <script src="script_updated.js"></script>
   <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.161.0/examples/jsm/controls/OrbitControls.js';
-    import { STLLoader } from 'https://unpkg.com/three@0.161.0/examples/jsm/loaders/STLLoader.js';
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js';
+    import { STLLoader } from 'https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/loaders/STLLoader.js';
 
     const canvas = document.getElementById('modelCanvas');
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf1f6f1);
+    const statusEl = document.getElementById('modelStatus');
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    function setStatus(text) {
+      if (statusEl) statusEl.textContent = text;
+    }
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf2f7f2);
+
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 5000);
-    camera.position.set(180, 140, 180);
+    camera.position.set(180, 120, 180);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.target.set(0, 20, 0);
 
-    const hemiLight = new THREE.HemisphereLight(0xffffff, 0xb7cbb7, 1.35);
-    scene.add(hemiLight);
+    const ambient = new THREE.AmbientLight(0xffffff, 1.6);
+    scene.add(ambient);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    dirLight.position.set(120, 160, 80);
-    scene.add(dirLight);
+    const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
+    light1.position.set(200, 200, 200);
+    scene.add(light1);
 
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
-    fillLight.position.set(-80, 60, -120);
-    scene.add(fillLight);
+    const light2 = new THREE.DirectionalLight(0xffffff, 0.9);
+    light2.position.set(-150, 100, -100);
+    scene.add(light2);
 
-    const grid = new THREE.GridHelper(280, 18, 0xcdd8cd, 0xe3ebe3);
-    grid.position.y = -35;
+    const grid = new THREE.GridHelper(300, 20, 0xb8c4b8, 0xd9e2d9);
+    grid.position.y = -40;
     scene.add(grid);
 
-    const material = new THREE.MeshPhysicalMaterial({
-      color: 0x8ca88f,
-      roughness: 0.46,
-      metalness: 0.08,
-      clearcoat: 0.25
-    });
-
-    const loader = new STLLoader();
-    loader.load(
-      'https://raw.githubusercontent.com/LOZEST/Composte-urabain/main/CAO/assemblage%20Final.stl',
-      (geometry) => {
-        geometry.computeVertexNormals();
-        geometry.center();
-
-        const mesh = new THREE.Mesh(geometry, material);
-        const box = new THREE.Box3().setFromObject(mesh);
-        const size = new THREE.Vector3();
-        box.getSize(size);
-        const maxDim = Math.max(size.x, size.y, size.z) || 1;
-        const scale = 150 / maxDim;
-        mesh.scale.setScalar(scale);
-        scene.add(mesh);
-
-        controls.target.set(0, 20, 0);
-        controls.update();
-      },
-      undefined,
-      () => {
-        const fallback = document.createElement('div');
-        fallback.style.padding = '24px';
-        fallback.style.color = '#60646c';
-        fallback.textContent = 'Impossible de charger le modèle 3D depuis GitHub.';
-        canvas.replaceWith(fallback);
-      }
-    );
+    const axes = new THREE.AxesHelper(60);
+    scene.add(axes);
 
     function resize() {
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
+      const width = canvas.clientWidth || 800;
+      const height = canvas.clientHeight || 600;
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     }
 
-    window.addEventListener('resize', resize);
     resize();
+    window.addEventListener('resize', resize);
+
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x2f7d4b,
+      roughness: 0.65,
+      metalness: 0.08
+    });
+
+    const loader = new STLLoader();
+
+    loader.load(
+      'CAO/assemblage-final.stl',
+      (geometry) => {
+        geometry.computeVertexNormals();
+        geometry.center();
+        geometry.computeBoundingBox();
+        geometry.computeBoundingSphere();
+
+        const mesh = new THREE.Mesh(geometry, material);
+
+        const sphere = geometry.boundingSphere;
+        const radius = sphere ? sphere.radius : 50;
+        const desiredRadius = 65;
+        const scale = desiredRadius / Math.max(radius, 1);
+
+        mesh.scale.setScalar(scale);
+        scene.add(mesh);
+
+        const camDistance = desiredRadius * 3.2;
+        camera.position.set(camDistance, camDistance * 0.7, camDistance);
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        setStatus('Modèle chargé avec succès.');
+      },
+      (xhr) => {
+        if (xhr.total) {
+          const percent = ((xhr.loaded / xhr.total) * 100).toFixed(0);
+          setStatus(`Chargement du modèle… ${percent}%`);
+        } else {
+          setStatus('Chargement du modèle…');
+        }
+      },
+      (error) => {
+        console.error(error);
+        setStatus('Impossible de charger le modèle STL. Vérifie que le fichier existe bien dans CAO/assemblage-final.stl');
+      }
+    );
 
     function animate() {
+      requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
     }
 
     animate();
