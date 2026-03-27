@@ -331,51 +331,52 @@
     window.addEventListener('resize', resize);
 
     const loader = new STLLoader();
-    const fileUrl = 'CAO/assemblage-final.stl';
+ const fileUrl = 'CAO/assemblage-final.stl';
 
-    loader.load(
-      fileUrl,
-      (geometry) => {
-        geometry.computeVertexNormals();
-        geometry.center();
-        geometry.computeBoundingBox();
-        geometry.computeBoundingSphere();
+setStatus('Téléchargement du STL…');
 
-        const mesh = new THREE.Mesh(geometry, material);
+fetch(fileUrl)
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.arrayBuffer();
+  })
+  .then((buffer) => {
+    setStatus(`Fichier téléchargé (${Math.round(buffer.byteLength / 1024 / 1024 * 100) / 100} Mo), parsing…`);
 
-        const sphere = geometry.boundingSphere;
-        const radius = sphere ? sphere.radius : 50;
-        const targetRadius = 80;
-        const scale = targetRadius / Math.max(radius, 1);
+    const geometry = loader.parse(buffer);
+    geometry.computeVertexNormals();
+    geometry.center();
+    geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
 
-        mesh.scale.setScalar(scale);
-        scene.add(mesh);
+    const mesh = new THREE.Mesh(geometry, material);
 
-        const distance = targetRadius * 3;
-        camera.position.set(distance, distance * 0.72, distance);
-        controls.target.set(0, 0, 0);
-        controls.update();
+    const sphere = geometry.boundingSphere;
+    const radius = sphere ? sphere.radius : 50;
+    const targetRadius = 80;
+    const scale = targetRadius / Math.max(radius, 1);
 
-        hideOverlay();
-        setStatus('Modèle chargé avec succès.');
-      },
-      (xhr) => {
-        if (xhr.total) {
-          const percent = ((xhr.loaded / xhr.total) * 100).toFixed(0);
-          setStatus(`Chargement du modèle… ${percent}%`);
-        } else {
-          setStatus('Chargement du modèle…');
-        }
-      },
-      (error) => {
-        console.error('Erreur STL :', error);
-        setStatus('Impossible de charger le modèle 3D. Vérifie que CAO/assemblage-final.stl existe bien.');
-        if (overlayEl) {
-          overlayEl.classList.remove('hidden');
-          overlayEl.textContent = 'Le modèle 3D n’a pas pu être chargé.';
-        }
-      }
-    );
+    mesh.scale.setScalar(scale);
+    scene.add(mesh);
+
+    const distance = targetRadius * 3;
+    camera.position.set(distance, distance * 0.72, distance);
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    hideOverlay();
+    setStatus('Modèle chargé avec succès.');
+  })
+  .catch((error) => {
+    console.error('Erreur STL :', error);
+    setStatus(`Impossible de charger le modèle 3D : ${error.message}`);
+    if (overlayEl) {
+      overlayEl.classList.remove('hidden');
+      overlayEl.textContent = 'Le modèle 3D n’a pas pu être chargé.';
+    }
+  });
 
     function animate() {
       requestAnimationFrame(animate);
