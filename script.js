@@ -1,3 +1,4 @@
+document.documentElement.classList.add("js-enabled");
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) entry.target.classList.add("in-view");
