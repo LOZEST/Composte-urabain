@@ -1070,12 +1070,17 @@ footer {
 }
 
 .reveal {
-  opacity: 0;
-  transform: translateY(34px);
+  opacity: 1;
+  transform: none;
   transition: opacity 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.reveal.in-view {
+.js-enabled .reveal {
+  opacity: 0;
+  transform: translateY(34px);
+}
+
+.js-enabled .reveal.in-view {
   opacity: 1;
   transform: translateY(0);
 }
