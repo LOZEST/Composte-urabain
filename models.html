@@ -26,9 +26,9 @@
     .model-stage {
       width: 100%; height: 620px; border-radius: 28px; overflow: hidden; position: relative;
       background:
-        radial-gradient(circle at 20% 25%, rgba(126,211,156,0.18), transparent 22%),
-        radial-gradient(circle at 78% 30%, rgba(96,165,250,0.15), transparent 20%),
-        linear-gradient(180deg, #f6faf6 0%, #eef4ef 100%);
+        radial-gradient(circle at 22% 26%, rgba(167, 243, 208, 0.16), transparent 22%),
+        radial-gradient(circle at 78% 28%, rgba(191, 219, 254, 0.18), transparent 20%),
+        linear-gradient(180deg, #f8fbf8 0%, #edf3ef 100%);
       border: 1px solid rgba(255,255,255,0.9); min-height: 420px;
     }
     #modelCanvas { width: 100%; height: 100%; display: block; }
@@ -125,18 +125,27 @@
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
 
-      scene.add(new THREE.AmbientLight(0xffffff, 1.8));
-
-      const light1 = new THREE.DirectionalLight(0xffffff, 1.2);
-      light1.position.set(220, 220, 220);
+      scene.add(new THREE.AmbientLight(0xffffff, 1.15));
+      
+      const hemiLight = new THREE.HemisphereLight(0xf8fbff, 0xdfe8df, 1.1);
+      scene.add(hemiLight);
+      
+      const light1 = new THREE.DirectionalLight(0xffffff, 1.25);
+      light1.position.set(220, 260, 180);
       scene.add(light1);
-
-      const light2 = new THREE.DirectionalLight(0xffffff, 1.0);
-      light2.position.set(-180, 120, -120);
+      
+      const light2 = new THREE.DirectionalLight(0xeaf4ea, 0.75);
+      light2.position.set(-160, 120, -120);
       scene.add(light2);
-
-      const grid = new THREE.GridHelper(320, 20, 0xb7c5b8, 0xdce5dd);
+      
+      const light3 = new THREE.DirectionalLight(0xdbeafe, 0.45);
+      light3.position.set(40, 80, 220);
+      scene.add(light3);
+      
+      const grid = new THREE.GridHelper(320, 20, 0xcfd8cf, 0xe9efea);
       grid.position.y = -45;
+      grid.material.opacity = 0.45;
+      grid.material.transparent = true;
       scene.add(grid);
 
       function resize() {
@@ -153,12 +162,13 @@
       function applyFallbackMaterial(root) {
         root.traverse(function (child) {
           if (child.isMesh) {
-            child.material = new THREE.MeshPhongMaterial({
-              color: 0x2d7a46,
-              shininess: 35,
-              specular: 0x2a2a2a,
-              side: THREE.DoubleSide
-            });
+          child.material = new THREE.MeshPhongMaterial({
+            color: 0x6f8f72,
+            shininess: 18,
+            specular: 0x1f2937,
+            transparent: false,
+            side: THREE.DoubleSide
+          });
             if (child.geometry) {
               child.geometry.computeVertexNormals();
             }
