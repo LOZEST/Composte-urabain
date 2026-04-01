@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenLoop — Conception, app & code</title>
+  <meta name="description" content="Le coeur technique de GreenLoop : composteur, application, logique de points, QR code et système autonome." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="top-progress" id="topProgress"></div>
+  <header class="topbar">
+    <div class="container nav-inner">
+      <a class="brand" href="index.html"><img src="assets/Logo-green-loop.JPG" alt="Logo GreenLoop" /><span>GreenLoop</span></a>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html">Accueil</a>
+        <a href="equipe.html">Équipe & partenaires</a>
+        <a href="conception.html" aria-current="page">Conception & app</a>
+        <a href="vision.html">Vision écologique</a>
+        <a href="models.html">Modèles 3D</a>
+      </nav>
+      <button class="menu-btn" id="menuBtn" aria-label="Ouvrir le menu" aria-expanded="false">☰</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container wrap">
+        <div class="page-hero-copy reveal" data-tilt>
+          <span class="eyebrow"><span class="dot"></span> Pilier 2 · Conception & technologie</span>
+          <h1>Le composteur, l’application et le code forment une seule expérience.</h1>
+          <p class="sub">Ici, le site montre ce qui rend GreenLoop crédible : une logique d’usage, un prototype lisible et une app mise en avant visuellement.</p>
+          <div class="hero-actions">
+            <a class="btn-primary" href="models.html">Voir la 3D</a>
+            <a class="btn-secondary" href="vision.html">Voir l’impact écologique</a>
+          </div>
+        </div>
+        <div class="side-showcase reveal">
+          <div class="mosaic">
+            <div class="mosaic-card"><strong>QR code</strong><p>L’utilisateur s’identifie rapidement et le dépôt devient traçable.</p></div>
+            <div class="mosaic-card"><strong>Points</strong><p>Le dépôt prend une valeur visible, ce qui rend l’expérience plus motivante.</p></div>
+            <div class="mosaic-card"><strong>Capteurs</strong><p>Le composteur peut être associé à une pesée et à un suivi de l’état des cuves.</p></div>
+            <div class="mosaic-card"><strong>App mobile</strong><p>Le téléphone devient le tableau de bord du projet.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="light">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker reveal"><span class="kicker-dot"></span> Architecture technique</span>
+          <h2 class="reveal">Trois blocs à faire ressortir visuellement.</h2>
+          <p class="reveal">J’ai organisé la page pour que le visiteur comprenne vite : le composteur physique, l’application et le code qui relie tout.</p>
+        </div>
+
+        <div class="grid-3">
+          <article class="card reveal"><div class="icon-badge">⚙️</div><h3>Le composteur</h3><p>Un système urbain automatisé, pensé pour plusieurs étapes de compostage et une utilisation plus propre, plus guidée et plus moderne.</p></article>
+          <article class="card reveal"><div class="icon-badge">📱</div><h3>L’application</h3><p>Une interface simple pour localiser les composteurs, gérer l’identité utilisateur, afficher les points et expliquer le fonctionnement.</p></article>
+          <article class="card reveal"><div class="icon-badge">💻</div><h3>Le code</h3><p>La logique logicielle relie QR code, pesée, suivi des états et interactions de l’utilisateur avec le composteur.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="light">
+      <div class="container">
+        <div class="app-showcase">
+          <div class="phone reveal" data-tilt>
+            <div class="phone-screen">
+              <div class="phone-header">
+                <h3>Démo de l’app</h3>
+                <p>La partie la plus marquante du site a été conservée et renforcée.</p>
+              </div>
+              <div class="phone-body">
+                <div class="app-card">
+                  <h4>Carte des composteurs</h4>
+                  <div class="app-map">
+                    <span class="pin one"></span>
+                    <span class="pin two"></span>
+                    <span class="pin three"></span>
+                  </div>
+                </div>
+                <div class="points-row">
+                  <div class="points-chip"><strong>1 120 pts</strong><span>points disponibles</span></div>
+                  <div class="points-chip"><strong>4.8 kg</strong><span>compost récupérable</span></div>
+                </div>
+                <div class="app-card">
+                  <h4>Profil & QR code</h4>
+                  <p>Le QR code identifie l’utilisateur devant la borne et déclenche le scénario de dépôt.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sim-shell reveal">
+            <div class="sim-head">
+              <div>
+                <strong style="font-size:1.35rem; letter-spacing:-.04em;">Simulation GreenLoop</strong>
+                <div class="sim-subtle">Une démonstration visuelle plus vivante du fonctionnement de l’app</div>
+              </div>
+              <div id="sim-points" class="badge">420 pts</div>
+            </div>
+
+            <div class="sim-tabs">
+              <button class="sim-tab-btn active" data-sim-tab="carte">Carte</button>
+              <button class="sim-tab-btn" data-sim-tab="depot">Dépôt</button>
+              <button class="sim-tab-btn" data-sim-tab="suivi">Suivi</button>
+            </div>
+
+            <div class="sim-screen" data-sim-screen="carte">
+              <div class="sim-panel">
+                <h4>Composteurs à proximité</h4>
+                <p>Le téléphone guide l’utilisateur vers le composteur le plus proche.</p>
+              </div>
+              <div class="sim-panel">
+                <div class="sim-map">
+                  <span class="pin one"></span>
+                  <span class="pin two"></span>
+                  <span class="pin three"></span>
+                </div>
+                <div class="sim-list">
+                  <div class="sim-item"><strong>Passy Centre</strong><span>Disponible · accès QR activé</span></div>
+                  <div class="sim-item"><strong>Lycée</strong><span>Collecte active · 2 minutes</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="sim-screen" data-sim-screen="depot" hidden>
+              <div class="sim-panel sim-deposit">
+                <h4>Déposer des déchets verts</h4>
+                <p>Fais varier le poids pour voir l’effet sur les points et le compost estimé.</p>
+                <input id="sim-kg-input" type="range" min="0.5" max="5" step="0.5" value="2.5" />
+                <div class="sim-action-row">
+                  <strong id="sim-kg-display">2.5 kg</strong>
+                  <span id="sim-gain-display">+250 points · 1.0 kg de compost estimé</span>
+                </div>
+                <div style="margin-top:14px;"><button id="sim-add-deposit" class="sim-button">Ajouter ce dépôt</button></div>
+              </div>
+            </div>
+
+            <div class="sim-screen" data-sim-screen="suivi" hidden>
+              <div class="sim-kpis">
+                <div class="sim-kpi"><div class="sim-kpi-label">Points</div><div id="sim-metric-points" class="sim-kpi-value">420</div></div>
+                <div class="sim-kpi"><div class="sim-kpi-label">Dépôts</div><div id="sim-metric-deposits" class="sim-kpi-value">7</div></div>
+                <div class="sim-kpi"><div class="sim-kpi-label">Compost</div><div id="sim-metric-compost" class="sim-kpi-value">6.2 kg</div></div>
+              </div>
+              <div class="sim-list">
+                <div class="sim-item"><strong>Cuve 1</strong><span id="sim-cuve1">Remplissage · 62%</span></div>
+                <div class="sim-item"><strong>Cuve 2</strong><span id="sim-cuve2">Digestion active · 57°C</span></div>
+                <div class="sim-item"><strong>Cuve 3</strong><span id="sim-cuve3">Maturation · ventilation régulée</span></div>
+                <div class="sim-item"><strong>Cuve 4</strong><span id="sim-cuve4">Stockage final · 34%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="light">
+      <div class="container">
+        <div class="feature-grid">
+          <div class="big-card reveal">
+            <h3>Ce que cette page raconte</h3>
+            <ul class="detail-list">
+              <li>Le projet n’est pas seulement écologique, il est aussi technique et structuré.</li>
+              <li>L’application donne une vraie présence visuelle au site et casse l’effet “simple dossier scolaire”.</li>
+              <li>Le visiteur comprend mieux comment GreenLoop pourrait fonctionner dans la réalité.</li>
+            </ul>
+          </div>
+          <div class="big-card reveal">
+            <h3>Ce que tu peux encore ajouter</h3>
+            <ul class="detail-list">
+              <li>Des captures de votre vraie app si vous en avez.</li>
+              <li>Une photo ou un schéma de la maquette réelle.</li>
+              <li>Des mots-clés plus précis sur les composants utilisés si tu veux renforcer le côté ingénieur.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer-shell reveal"><div class="footer-panel"><div><strong>Conception & app</strong><span>Une page pensée pour impressionner visuellement et garder la démo téléphone au centre.</span></div><div><span>Le rendu est plus moderne, plus coloré et plus vivant.</span></div></div></div>
+  <footer>© 2026 GreenLoop — Conception & technologie</footer>
+  <script src="script.js"></script>
+</body>
+</html>

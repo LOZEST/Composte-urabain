@@ -1,11 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="GreenLoop logo">
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#34c759"/>
-      <stop offset="100%" stop-color="#1f7a4d"/>
+    <linearGradient id="g1" x1="20" y1="12" x2="112" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8DF1A7"/>
+      <stop offset="0.45" stop-color="#2FD97A"/>
+      <stop offset="1" stop-color="#0F7B45"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="17" y1="20" x2="112" y2="104" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E2F1D"/>
+      <stop offset="1" stop-color="#0B5B33"/>
     </linearGradient>
   </defs>
-  <rect width="128" height="128" rx="30" fill="#f5fbf6"/>
-  <path d="M64 22c-20.2 0-36.7 15-39.2 34.5h16.3C43.3 45 52.6 38 64 38c8 0 15.3 3.5 20.3 9.1l-9.7 9.7h31.2V25.6l-10.2 10.2C87.8 27.1 76.5 22 64 22Z" fill="url(#g)"/>
-  <path d="M64 106c20.2 0 36.7-15 39.2-34.5H86.9C84.7 83 75.4 90 64 90c-8 0-15.3-3.5-20.3-9.1l9.7-9.7H22.2v31.2l10.2-10.2C40.2 100.9 51.5 106 64 106Z" fill="url(#g)"/>
+  <rect x="8" y="8" width="112" height="112" rx="32" fill="url(#g2)"/>
+  <path d="M39 76C39 56.1178 55.1178 40 75 40H90C90 59.8822 73.8822 76 54 76H39Z" fill="url(#g1)"/>
+  <path d="M41.5 88C59.4493 88 74 73.4493 74 55.5V39C56.0507 39 41.5 53.5507 41.5 71.5V88Z" fill="#E9FFF0" fill-opacity="0.95"/>
+  <path d="M56 55C69.8071 55 81 66.1929 81 80V91H74C60.1929 91 49 79.8071 49 66V55H56Z" fill="#7EE89E"/>
+  <circle cx="93" cy="35" r="8" fill="#E9FFF0" fill-opacity="0.9"/>
 </svg>
