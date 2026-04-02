@@ -375,43 +375,81 @@ section.block{
   .section-head{margin-bottom:18px}
   .section-head h2{max-width:none}
 }
-.partner-logos {
+.partner-logos{
+  width: var(--container);
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 20px;
-  margin-top: 30px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
 }
 
-.logo-card {
+.logo-card{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 220px;
+  padding: 22px 20px 18px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+  transition: transform .25s ease, border-color .25s ease, background .25s ease, box-shadow .25s ease;
+  text-align: center;
+}
+
+.logo-card:hover{
+  transform: translateY(-4px);
+  border-color: rgba(56,214,122,0.35);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  box-shadow: 0 22px 50px rgba(0,0,0,0.28);
+}
+
+.logo-card .logo-box{
+  width: 100%;
+  height: 108px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.96);
   display: flex;
   align-items: center;
   justify-content: center;
-
-  height: 120px;
-  padding: 20px;
-
-  border-radius: 20px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-
-  transition: all 0.3s ease;
+  padding: 14px;
+  overflow: hidden;
 }
 
-.logo-card:hover {
-  transform: translateY(-6px);
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-}
-
-.logo-card img {
-  max-width: 100%;
-  max-height: 60px;
-
+.logo-card img{
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-
-  /* important */
-  filter: none;
+  object-position: center;
+  display: block;
+  filter: none !important;
 }
-.logo-card {
-  backdrop-filter: blur(10px);
+
+.logo-card strong{
+  margin-top: 14px;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  color: #f4f7f5;
+  font-weight: 700;
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 980px){
+  .partner-logos{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px){
+  .partner-logos{
+    grid-template-columns: 1fr;
+  }
+
+  .logo-card{
+    min-height: 200px;
+  }
 }
