@@ -884,3 +884,8 @@ footer {
   .member-pill { padding: 24px; }
   .phone { height: 690px; }
 }
+html, body{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
