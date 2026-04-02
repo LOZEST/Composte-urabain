@@ -419,7 +419,7 @@ section.block{
 
 .logo-card img{
   max-width: 130px;
-  max-height: 5px;
+  max-height: 50px;
   width: auto;
   height: auto;
   object-fit: contain;
