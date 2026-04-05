@@ -466,10 +466,15 @@ section.block{
   }
 }
 .app-frame{
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 390px;
+  height: 844px;
   border: none;
-  background: white;
-  border-radius: 35px;
   display: block;
+  transform-origin: top left;
+  transform: scale(var(--app-scale, 1));
+  border-radius: 0;
 }
+

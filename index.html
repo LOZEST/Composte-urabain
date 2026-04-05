@@ -47,8 +47,8 @@
       <div class="device-wrap">
         <div class="glow"></div>
         <div class="phone-shell">
-          <div class="phone-screen">
-            <iframe src="https://composte-urabain.vercel.app" class="app-frame" allow="geolocation"></iframe>
+          <div class="phone-screen" id="phoneScreen">
+            <iframe src="https://composte-urabain.vercel.app" class="app-frame" id="appFrame" allow="geolocation"></iframe>
           </div>
         </div>
         <div class="floating-card">
@@ -176,5 +176,16 @@
 
   </div>
   <script src="script.js"></script>
+  <script>
+    function scaleApp() {
+      const screen = document.getElementById('phoneScreen');
+      const frame = document.getElementById('appFrame');
+      if (!screen || !frame) return;
+      const scale = Math.min(screen.offsetWidth / 390, screen.offsetHeight / 844);
+      frame.style.transform = 'scale(' + scale + ')';
+    }
+    window.addEventListener('load', scaleApp);
+    window.addEventListener('resize', scaleApp);
+  </script>
 </body>
 </html>
