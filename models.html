@@ -273,7 +273,7 @@
       return new Float32Array(vertices);
     }
 
-    const OBJ_URL = 'https://raw.githubusercontent.com/LOZEST/Composte-urabain/main/assemblage-final.obj';
+    const OBJ_URL = 'https://raw.githubusercontent.com/LOZEST/Composte-urabain/main/CAO/assemblage-final.obj';
 
     fetch(OBJ_URL)
       .then(r => { if (!r.ok) throw new Error('Fichier non trouvé'); return r.text(); })
