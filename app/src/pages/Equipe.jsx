@@ -29,7 +29,7 @@ const team = [
 const partners = [
   { href: 'https://www.paprec.com/', src: '/assets/logo paprec.png', name: 'Paprec' },
   { href: 'https://www.derichebourg.com/', src: '/assets/logo derichbourg.png', name: 'Derichebourg' },
-  { href: 'https://www.rueilmalmaison.fr/', src: '/assets/logo rueill.png', name: 'Ville de Rueil-Malmaison' },
+
   { href: 'https://francebiodechets.org/', src: '/assets/logo france.png', name: 'France Biodéchets' },
   { href: 'https://www.adivalor.fr/', src: '/assets/logo adivalor.png', name: 'Adivalor' },
   { href: 'https://amorce.asso.fr/', src: '/assets/logo amorce.png', name: 'Amorce' },
