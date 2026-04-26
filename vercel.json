@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd app && npm install && npm run build",
+  "buildCommand": "npm install --prefix app && npm --prefix app run build",
   "outputDirectory": "app/dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
