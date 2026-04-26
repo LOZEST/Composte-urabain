@@ -1,19 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --bg: #07130f;
-  --bg2: #0b1d17;
-  --card: rgba(255,255,255,.06);
+  --bg: #05100c;
+  --bg2: #091a13;
+  --card: rgba(255,255,255,.055);
   --card-h: rgba(255,255,255,.09);
   --line: rgba(255,255,255,.09);
-  --line2: rgba(255,255,255,.14);
-  --text: #f4f7f5;
-  --muted: #b8c4be;
+  --line2: rgba(255,255,255,.16);
+  --text: #f2f7f4;
+  --muted: #a8bcb4;
   --green: #38d67a;
-  --green2: #8cffbe;
+  --green2: #7dfaae;
   --container: min(1180px, 92vw);
   --radius: 28px;
-  --shadow: 0 18px 60px rgba(0,0,0,.28);
+  --shadow: 0 20px 70px rgba(0,0,0,.35);
+  --shadow-card: 0 2px 0 rgba(255,255,255,.04) inset, 0 20px 60px rgba(0,0,0,.3);
+  --glow-green: 0 0 0 1px rgba(56,214,122,.22), 0 24px 64px rgba(0,0,0,.36);
+  --glow-card: 0 0 0 1px rgba(56,214,122,.18), 0 0 40px rgba(56,214,122,.06), 0 24px 64px rgba(0,0,0,.36);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,14 +24,20 @@ html { scroll-behavior: smooth; }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at 10% 10%, rgba(56,214,122,.15), transparent 28%),
-              radial-gradient(circle at 90% 10%, rgba(48,107,255,.10), transparent 24%),
-              linear-gradient(180deg, var(--bg) 0%, var(--bg2) 48%, #091511 100%);
-  line-height: 1.5;
+  background:
+    radial-gradient(ellipse 80% 50% at 5% 0%, rgba(56,214,122,.18), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 95% 5%, rgba(48,107,255,.12), transparent 45%),
+    radial-gradient(ellipse 50% 60% at 50% 100%, rgba(30,90,55,.15), transparent 55%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 50%, #071410 100%);
+  line-height: 1.55;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 a { text-decoration: none; color: inherit; }
 img { max-width: 100%; display: block; }
-h1,h2,h3 { margin: 0; letter-spacing: -.045em; line-height: .98; }
+h1,h2,h3 { margin: 0; letter-spacing: -.04em; line-height: .97; }
 button { cursor: pointer; font-family: inherit; border: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
