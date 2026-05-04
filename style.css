@@ -69,7 +69,9 @@ img{max-width:100%;display:block}
   font-weight:700;
   letter-spacing:-.03em;
   min-width:max-content;
+  order:2;
 }
+.nav-links{order:1;}
 .brand-mark{
   width:42px;height:42px;border-radius:14px;
   background:linear-gradient(135deg,#123726,#1d5d40 56%,#38d67a);
