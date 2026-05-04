@@ -1,0 +1,185 @@
+/*
+ * KS0530 Keyestudio Solar Tracking Kit
+ * Code de suivi solaire - Sans DHT11
+ * 
+ * Branchements :
+ *   Servo bas (horizontal)  → D9
+ *   Servo haut (vertical)   → D10
+ *   Capteur gauche          → A0
+ *   Capteur droit           → A1
+ *   Capteur arrière         → A2
+ *   Capteur avant           → A3
+ *   Bouton                  → D2
+ *   Buzzer                  → D6
+ *   LED                     → D3
+ *   LCD I2C (SDA/SCL)       → A4/A5
+ *   BH1750 I2C (SDA/SCL)   → A4/A5
+ */
+
+#include <Servo.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <BH1750.h>
+
+// ─── Définition des pins ────────────────────────────────
+#define PIN_SERVO_H   9
+#define PIN_SERVO_V   10
+#define PIN_LDR_LEFT  A0
+#define PIN_LDR_RIGHT A1
+#define PIN_LDR_BACK  A2
+#define PIN_LDR_FRONT A3
+#define PIN_BUTTON    2
+#define PIN_BUZZER    6
+#define PIN_LED       3
+
+// ─── Paramètres de tracking ─────────────────────────────
+#define TOLERANCE     10
+#define SERVO_H_MIN   0
+#define SERVO_H_MAX   180
+#define SERVO_V_MIN   10
+#define SERVO_V_MAX   90
+#define SERVO_STEP    2
+#define LOOP_DELAY    20
+
+// ─── Objets ─────────────────────────────────────────────
+Servo servoH;
+Servo servoV;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+BH1750 lightMeter;
+
+// ─── Variables globales ─────────────────────────────────
+int angleH = 90;
+int angleV = 10;
+bool trackingEnabled = true;
+unsigned long lastLcdUpdate = 0;
+unsigned long lastBtnPress  = 0;
+
+// ────────────────────────────────────────────────────────
+void setup() {
+  Serial.begin(9600);
+
+  // Initialisation servos
+  servoH.attach(PIN_SERVO_H);
+  servoV.attach(PIN_SERVO_V);
+  servoH.write(angleH);
+  servoV.write(angleV);
+  delay(1000);
+
+  // Initialisation LCD
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Solar Tracker");
+  lcd.setCursor(0, 1);
+  lcd.print("Initializing...");
+  delay(2000);
+  lcd.clear();
+
+  // Initialisation BH1750
+  Wire.begin();
+  lightMeter.begin();
+
+  // Initialisation bouton, buzzer, LED
+  pinMode(PIN_BUTTON, INPUT);
+  pinMode(PIN_BUZZER, OUTPUT);
+  pinMode(PIN_LED, OUTPUT);
+
+  // Bip de démarrage
+  tone(PIN_BUZZER, 1000, 200);
+  delay(300);
+  tone(PIN_BUZZER, 1500, 200);
+  delay(300);
+  noTone(PIN_BUZZER);
+
+  digitalWrite(PIN_LED, HIGH);
+
+  Serial.println("=== Solar Tracker Démarré ===");
+  Serial.println("G=Gauche  D=Droit  Ar=Arriere  Av=Avant");
+  Serial.println("=====================================");
+}
+
+// ────────────────────────────────────────────────────────
+void loop() {
+
+  // ── Bouton : activer/désactiver le tracking ──────────
+  if (digitalRead(PIN_BUTTON) == HIGH) {
+    if (millis() - lastBtnPress > 300) {
+      trackingEnabled = !trackingEnabled;
+      lastBtnPress = millis();
+      if (trackingEnabled) {
+        tone(PIN_BUZZER, 1200, 100);
+        digitalWrite(PIN_LED, HIGH);
+        Serial.println(">>> Tracking ON");
+      } else {
+        tone(PIN_BUZZER, 600, 200);
+        digitalWrite(PIN_LED, LOW);
+        Serial.println(">>> Tracking OFF");
+      }
+    }
+  }
+
+  // ── Lecture des 4 capteurs LDR ───────────────────────
+  int ldrLeft  = analogRead(PIN_LDR_LEFT);
+  int ldrRight = analogRead(PIN_LDR_RIGHT);
+  int ldrBack  = analogRead(PIN_LDR_BACK);
+  int ldrFront = analogRead(PIN_LDR_FRONT);
+
+  Serial.print("G:"); Serial.print(ldrLeft);
+  Serial.print("  D:"); Serial.print(ldrRight);
+  Serial.print("  Ar:"); Serial.print(ldrBack);
+  Serial.print("  Av:"); Serial.print(ldrFront);
+  Serial.print("  | AngleH:"); Serial.print(angleH);
+  Serial.print("  AngleV:"); Serial.println(angleV);
+
+  // ── Tracking solaire ─────────────────────────────────
+  if (trackingEnabled) {
+
+    // Axe horizontal : gauche vs droit
+    int diffH = ldrLeft - ldrRight;
+    if (abs(diffH) > TOLERANCE) {
+      if (diffH > 0) {
+        angleH = constrain(angleH - SERVO_STEP, SERVO_H_MIN, SERVO_H_MAX);
+      } else {
+        angleH = constrain(angleH + SERVO_STEP, SERVO_H_MIN, SERVO_H_MAX);
+      }
+      servoH.write(angleH);
+    }
+
+    // Axe vertical : avant vs arrière
+    int diffV = ldrFront - ldrBack;
+    if (abs(diffV) > TOLERANCE) {
+      if (diffV > 0) {
+        angleV = constrain(angleV + SERVO_STEP, SERVO_V_MIN, SERVO_V_MAX);
+      } else {
+        angleV = constrain(angleV - SERVO_STEP, SERVO_V_MIN, SERVO_V_MAX);
+      }
+      servoV.write(angleV);
+    }
+  }
+
+  // ── Mise à jour LCD toutes les 1 seconde ─────────────
+  if (millis() - lastLcdUpdate > 1000) {
+    lastLcdUpdate = millis();
+
+    float lux = lightMeter.readLightLevel();
+
+    lcd.clear();
+
+    // Ligne 1 : Luminosité
+    lcd.setCursor(0, 0);
+    lcd.print("Lumiere:");
+    lcd.print((int)lux);
+    lcd.print(" lx");
+
+    // Ligne 2 : Angles et statut
+    lcd.setCursor(0, 1);
+    lcd.print("H:");
+    lcd.print(angleH);
+    lcd.print(" V:");
+    lcd.print(angleV);
+    lcd.print(" ");
+    lcd.print(trackingEnabled ? "ON " : "OFF");
+  }
+
+  delay(LOOP_DELAY);
+}
