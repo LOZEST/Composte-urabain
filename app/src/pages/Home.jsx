@@ -42,13 +42,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="container strip-metrics">
+        <motion.section initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.5}} className="container strip-metrics">
           <article><strong>Autonome</strong><p>Accès, pesée et suivi pensés pour un usage simple.</p></article>
           <article><strong>Connecté</strong><p>Application mobile et logique de points pour suivre les dépôts.</p></article>
           <article><strong>Urbain</strong><p>Une solution conçue pour les villes, collectivités et lieux partagés.</p></article>
-        </section>
+        </motion.section>
 
-        <section className="container process-v2">
+        <motion.section initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.5}} className="container process-v2">
           <header>
             <p className="kicker">Le principe</p>
             <h2>Un parcours en 4 étapes.</h2>
@@ -64,9 +64,9 @@ export default function Home() {
               </article>
             ))}
           </div>
-        </section>
+        </motion.section>
 
-        <section className="container partners-v2">
+        <motion.section initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.5}} className="container partners-v2">
           <header>
             <p className="kicker">Les partenaires</p>
             <h2>Des soutiens visibles sur le projet.</h2>
@@ -79,9 +79,9 @@ export default function Home() {
               </a>
             ))}
           </div>
-        </section>
+        </motion.section>
 
-        <section className="container cta-v2">
+        <motion.section initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.5}} className="container cta-v2">
           <div>
             <p className="kicker">Explorer GreenLoop</p>
             <h3>Poursuivre la découverte du projet.</h3>
@@ -92,7 +92,7 @@ export default function Home() {
             <Link to="/vision">Vision écologique</Link>
             <Link to="/modeles">Modèles 3D</Link>
           </div>
-        </section>
+        </motion.section>
       </main>
     </PageTransition>
   )
