@@ -33,9 +33,10 @@
 
 .card {
   border: 1px solid rgba(255,255,255,.09);
-  background: rgba(255,255,255,.055);
+  background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
   border-radius: var(--radius);
-  padding: 24px;
+  backdrop-filter: blur(8px);
+  padding: 26px;
   box-shadow: var(--shadow-card);
   transition: border-color .3s, box-shadow .3s, transform .3s cubic-bezier(.22,1,.36,1);
   cursor: default;
@@ -139,7 +140,7 @@
 
 /* CTA band */
 .cta-band {
-  margin: 36px auto 0;
+  margin: 44px auto 0;
   border: 1px solid rgba(56,214,122,.22);
   background: linear-gradient(135deg,rgba(56,214,122,.13) 0%,rgba(56,214,122,.05) 50%,rgba(255,255,255,.03) 100%);
   border-radius: 32px; padding: 32px;
