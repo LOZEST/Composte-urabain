@@ -2,6 +2,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
 import Home from './pages/Home'
+import Equipe from './pages/Equipe'
+import Conception from './pages/Conception'
+import Vision from './pages/Vision'
+import Models from './pages/Models'
 import './App.css'
 
 export default function App() {
@@ -10,7 +14,11 @@ export default function App() {
       <div className='page'>
         <Nav />
         <Routes>
-          <Route path='*' element={<Home />} />
+          <Route path='/' element={<Home />} />
+          <Route path='/equipe' element={<Equipe />} />
+          <Route path='/conception' element={<Conception />} />
+          <Route path='/vision' element={<Vision />} />
+          <Route path='/modeles' element={<Models />} />
         </Routes>
         <Footer />
       </div>
