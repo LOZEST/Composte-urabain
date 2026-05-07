@@ -1,0 +1,1873 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  Pressable,
+  StatusBar,
+  FlatList,
+  TextInput,
+  ScrollView,
+  Animated,
+  Easing,
+  Dimensions,
+  Platform,
+  Alert,
+  Image,
+} from "react-native";
+
+import MapView, { Marker, Callout } from "react-native-maps";
+import * as Location from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import QRCode from "react-native-qrcode-svg";
+
+const { width: SCREEN_W } = Dimensions.get("window");
+
+/* =========================
+   ASSETS
+========================= */
+const LOGO = require("./actifs/logo.png");
+const COMPOST_IMG = require("./actifs/compost.png");
+
+/* =========================
+   CONFIG
+========================= */
+const ADMIN = { username: "admin", role: "ADMIN" };
+const COMPOST_RATIO = 0.4; // ✅ 1kg déchets -> 0.4kg compost
+const MATURATION_DAYS = 20;
+const DEFAULT_USER_COORDS = { latitude: 48.8719, longitude: 2.2255 };
+const DEFAULT_ADMIN_PIN = "1234";
+const DEFAULT_VAT_CAPACITY_KG = 25;
+const STORAGE_VAT_CAPACITY_KG = 60;
+const DEFAULT_TRANSFER_RATIO = COMPOST_RATIO;
+
+/* ✅ 1kg = 100 points */
+function pointsFromDepositKg(kg) {
+  const n = Number(kg);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.round(n * 100);
+}
+
+/* =========================
+   STORAGE KEYS
+========================= */
+const K_COMPOSTERS = "greenloop_composters_v3";
+const K_DEPOSITS = "greenloop_deposits_v3";
+const K_SESSION = "greenloop_session_v3";
+const K_PROFILE = "greenloop_profile_v3";
+const K_USERS = "greenloop_users_v1";
+const K_CURRENT_USER = "greenloop_current_user_v1";
+const K_THEME = "greenloop_theme_v3";
+const K_ADMIN_PIN = "greenloop_admin_pin_v3";
+const K_SPENT_POINTS = "greenloop_spent_points_v1";
+const K_REMOTE_CONFIG = "greenloop_remote_config_v1";
+const K_LAST_PUSH = "greenloop_last_push_v1";
+const K_VAT_CONFIG = "greenloop_vat_config_v1";
+const K_VAT_STATS = "greenloop_vat_stats_v1";
+const K_MOTOR_CONFIG = "greenloop_motor_config_v1";
+const K_MOTOR_RUNTIME = "greenloop_motor_runtime_v1";
+const K_FAN_CONFIG = "greenloop_fan_config_v1";
+const K_FAN_RUNTIME = "greenloop_fan_runtime_v1";
+
+/* =========================
+   THEMES
+========================= */
+const DARK = {
+  mode: "dark",
+  bg: "#0B0B0E",
+  panel: "#121219",
+  card: "#171721",
+  card2: "#1C1C27",
+  text: "#F4F4F6",
+  mutetext: "#B7B7C2",
+  line: "rgba(255,255,255,0.08)",
+  yellow: "#FFD100",
+  red: "#FF2A2A",
+  green: "#37D67A",
+  shadow: "rgba(0,0,0,0.45)",
+  overlay: "rgba(0,0,0,0.55)",
+};
+
+const LIGHT = {
+  mode: "light",
+  bg: "#F6F7F9",
+  panel: "#FFFFFF",
+  card: "#FFFFFF",
+  card2: "#F1F3F6",
+  text: "#111114",
+  mutetext: "#5A5A66",
+  line: "rgba(0,0,0,0.08)",
+  yellow: "#FFD100",
+  red: "#E62424",
+  green: "#2BBF6A",
+  shadow: "rgba(0,0,0,0.15)",
+  overlay: "rgba(0,0,0,0.35)",
+};
+
+/* =========================
+   CUVE MODES
+========================= */
+
+const VAT_MODES = [
+  { key: "REMPLISSAGE", label: "Remplissage", icon: "🧺" },
+  { key: "RAMOLLISSEMENT", label: "Ramollissement", icon: "♨️" },
+  { key: "DIGESTION_ACTIVE", label: "Digestion active", icon: "🔥" },
+  { key: "MATURATION", label: "Maturation", icon: "⏳" },
+  { key: "STOCKAGE", label: "Stockage", icon: "📦" },
+];
+
+const MODE_DEFAULT_TEMP = {
+  REMPLISSAGE: 30,
+  RAMOLLISSEMENT: 32,
+  DIGESTION_ACTIVE: 58,
+  MATURATION: 25,
+  STOCKAGE: 24,
+};
+
+
+function clampTemp(t) {
+  if (!Number.isFinite(t)) return 0;
+  return Math.max(-10, Math.min(90, t));
+}
+
+/* =========================
+   PILOTAGE À DISTANCE
+========================= */
+const FAN_MODES = [
+  { key: "OFF", label: "OFF (laisser chauffer naturellement)" },
+  { key: "ON_REG", label: "ON (Régulation : s’active si seuil atteint)" },
+  { key: "INTERMITTENT", label: "INTERMITTENT (toutes les X heures)" },
+];
+
+
+const DEFAULT_REMOTE_CONFIG = {
+  REMPLISSAGE: {
+    tempMin: 25,
+    tempMax: 40,
+    humidity: 70,
+    co2Target: 450,
+    gasTarget: 360,
+    fanMode: "OFF",
+    fanThresholdTemp: 65,
+    fanIntervalHours: 2,
+    fillStartThresholdPct: 100,
+    allowManualStart: true,
+    autoStartWhenFull: true,
+    mixEnabled: false,
+    mixIntervalDays: 0,
+    mixImmediate: false,
+    transferEnabled: false,
+    transferImmediate: false,
+    durationDays: 0,
+  },
+  RAMOLLISSEMENT: {
+    tempMin: 25,
+    tempMax: 40,
+    humidity: 70,
+    co2Target: 450,
+    gasTarget: 360,
+    fanMode: "OFF",
+    fanThresholdTemp: 65,
+    fanIntervalHours: 2,
+    mixEnabled: true,
+    mixIntervalDays: 3,
+    mixImmediate: false,
+    transferEnabled: false,
+    transferImmediate: false,
+    durationDays: 20,
+  },
+  DIGESTION_ACTIVE: {
+    tempMin: 50,
+    tempMax: 65,
+    humidity: 60,
+    co2Target: 900,
+    gasTarget: 680,
+    fanMode: "ON_REG",
+    fanThresholdTemp: 65,
+    fanIntervalHours: 2,
+    mixEnabled: true,
+    mixIntervalDays: 5,
+    mixImmediate: false,
+    transferEnabled: false,
+    transferImmediate: false,
+    durationDays: 20,
+  },
+  MATURATION: {
+    tempMin: 20,
+    tempMax: 30,
+    humidity: 50,
+    co2Target: 500,
+    gasTarget: 260,
+    fanMode: "INTERMITTENT",
+    fanThresholdTemp: 65,
+    fanIntervalHours: 2,
+    mixEnabled: false,
+    mixIntervalDays: 0,
+    mixImmediate: false,
+    transferEnabled: true,
+    transferImmediate: false,
+    durationDays: 20,
+  },
+  STOCKAGE: {
+    tempMin: 20,
+    tempMax: 30,
+    humidity: 45,
+    co2Target: 420,
+    gasTarget: 220,
+    fanMode: "OFF",
+    fanThresholdTemp: 65,
+    fanIntervalHours: 2,
+    mixEnabled: false,
+    mixIntervalDays: 0,
+    mixImmediate: false,
+    transferEnabled: false,
+    transferImmediate: false,
+    durationDays: 0,
+  },
+};
+
+
+/* =========================
+   DEMO DATA
+========================= */
+
+const SEED_COMPOSTERS = [
+  {
+    id: "c1",
+    name: "Composteur Mairie",
+    address: "Centre-ville",
+    latitude: 48.8723,
+    longitude: 2.2235,
+    accepts: ["Épluchures", "Marc de café", "Coquilles d'œufs"],
+    vats: [
+      { id: "v1", label: "Cuve 1", tempC: 30, mode: "REMPLISSAGE" },
+      { id: "v2", label: "Cuve 2", tempC: 30, mode: "REMPLISSAGE" },
+      { id: "v3", label: "Cuve 3", tempC: 30, mode: "REMPLISSAGE" },
+      { id: "v4", label: "Cuve 4 (stockage)", tempC: 24, mode: "STOCKAGE" },
+    ],
+  },
+  {
+    id: "c2",
+    name: "Composteur Parc",
+    address: "Entrée principale",
+    latitude: 48.8709,
+    longitude: 2.2272,
+    accepts: ["Déchets verts", "Épluchures", "Serviettes papier"],
+    vats: [
+      { id: "v1", label: "Cuve 1", tempC: 30, mode: "REMPLISSAGE" },
+      { id: "v2", label: "Cuve 2", tempC: 30, mode: "REMPLISSAGE" },
+      { id: "v3", label: "Cuve 3", tempC: 30, mode: "REMPLISSAGE" },
+      { id: "v4", label: "Cuve 4 (stockage)", tempC: 24, mode: "STOCKAGE" },
+    ],
+  },
+];
+
+
+/* =========================
+   SHOP OFFERS
+========================= */
+const SHOP_OFFERS = [
+  { id: "o1", title: "0,4 kg de compost", kg: 0.4, cost: 100 },
+  { id: "o2", title: "1 kg de compost", kg: 1.0, cost: 250 },
+  { id: "o3", title: "2 kg de compost", kg: 2.0, cost: 450 },
+  { id: "o4", title: "5 kg de compost", kg: 5.0, cost: 900 },
+  { id: "o5", title: "10 kg de compost", kg: 10.0, cost: 1700 },
+];
+
+/* =========================
+   HELPERS
+========================= */
+function uid(prefix = "id") {
+  return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now().toString(16)}`;
+}
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+function formatDateFR(d) {
+  try {
+    return new Intl.DateTimeFormat("fr-FR", { year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(d));
+  } catch {
+    const x = new Date(d);
+    return `${String(x.getDate()).padStart(2, "0")}/${String(x.getMonth() + 1).padStart(2, "0")}/${x.getFullYear()}`;
+  }
+}
+function kmBetween(a, b) {
+  const R = 6371;
+  const toRad = (v) => (v * Math.PI) / 180;
+  const dLat = toRad(b.latitude - a.latitude);
+  const dLon = toRad(b.longitude - a.longitude);
+  const lat1 = toRad(a.latitude);
+  const lat2 = toRad(b.latitude);
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+async function readJSON(key, fallback) {
+  const raw = await AsyncStorage.getItem(key);
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+async function writeJSON(key, value) {
+  await AsyncStorage.setItem(key, JSON.stringify(value));
+}
+
+function withTimeout(promise, ms = 8000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
+  ]);
+}
+function safeJsonParse(textValue, fallback = null) {
+  try {
+    return JSON.parse(textValue);
+  } catch {
+    return fallback;
+  }
+}
+async function apiRequest(baseUrl, path, options = {}) {
+  const url = `${String(baseUrl || "").replace(/\/+$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  const res = await withTimeout(fetch(url, { ...options, headers }), 10000);
+  const raw = await res.text();
+  const data = safeJsonParse(raw, raw);
+  if (!res.ok) {
+    const msg = typeof data === "string" ? data : data?.message || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+  return data;
+}
+function defaultSensorStateFromVat(vat, cfg) {
+  return {
+    tempC: null,
+    humidity: null,
+    airQuality: null,
+    co2Ppm: null,
+    gasPpm: null,
+    fillPct: Number(vat?.id === "v4" ? 0 : 0),
+    fan: null,
+    action: "En attente de données carte",
+    updatedAt: new Date().toISOString(),
+    currentMode: vat?.mode || "REMPLISSAGE",
+    cycleStartedAt: null,
+    transferActive: false,
+    mixOn: false,
+    remainingDays: null,
+    online: false,
+    sensorErrors: {
+      tempC: true,
+      humidity: true,
+      airQuality: true,
+      co2Ppm: true,
+      gasPpm: true,
+      fan: true,
+    },
+  };
+}
+function pickNumericSensorValue(sensor, keys = []) {
+  for (const key of keys) {
+    const raw = sensor?.[key];
+    if (raw == null || raw === "") continue;
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+}
+function pickStringSensorValue(sensor, keys = []) {
+  for (const key of keys) {
+    const raw = sensor?.[key];
+    if (raw == null) continue;
+    const str = String(raw).trim();
+    if (str) return str;
+  }
+  return null;
+}
+function normalizeIncomingSensor(sensor = {}, vat = {}) {
+  const weightKg = Math.max(0, Number(sensor.weightKg ?? sensor.weight_kg ?? sensor.massKg ?? sensor.mass_kg ?? 0));
+  const explicitFill = sensor.fillPct ?? sensor.fill_pct ?? sensor.fillLevel;
+  const tempC = pickNumericSensorValue(sensor, ["tempC", "temperature"]);
+  const humidity = pickNumericSensorValue(sensor, ["humidity"]);
+  const airQuality = pickNumericSensorValue(sensor, ["airQuality", "air_quality"]);
+  const co2Ppm = pickNumericSensorValue(sensor, ["co2Ppm", "co2", "co2_ppm"]);
+  const gasPpm = pickNumericSensorValue(sensor, ["gasPpm", "gas", "gas_ppm"]);
+  const fan = pickStringSensorValue(sensor, ["fan", "fanState"]);
+  return {
+    tempC,
+    humidity,
+    airQuality,
+    co2Ppm,
+    gasPpm,
+    weightKg,
+    compostReadyKg: Math.max(0, Number(sensor.compostReadyKg ?? sensor.compost_ready_kg ?? 0)),
+    fillPct: explicitFill == null ? computeFillPctFromKg(weightKg, vat.id) : clampPct(Number(explicitFill)),
+    fan,
+    action: String(sensor.action ?? "Données reçues depuis la carte"),
+    updatedAt: sensor.updatedAt || sensor.updated_at || new Date().toISOString(),
+    currentMode: sensor.currentMode || sensor.mode || vat.mode || "REMPLISSAGE",
+    cycleStartedAt: sensor.cycleStartedAt || sensor.cycle_started_at || null,
+    transferActive: !!(sensor.transferActive ?? sensor.transfer_active),
+    mixOn: !!(sensor.mixOn ?? sensor.mix_on),
+    remainingDays: sensor.remainingDays == null ? null : Number(sensor.remainingDays),
+    online: sensor.online !== false,
+    sensorErrors: {
+      tempC: tempC == null,
+      humidity: humidity == null,
+      airQuality: airQuality == null,
+      co2Ppm: co2Ppm == null,
+      gasPpm: gasPpm == null,
+      fan: fan == null,
+    },
+  };
+}
+function renderSensorValue(value, unit = "", digits = 0) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "Erreur";
+  return `${n.toFixed(digits)}${unit}`;
+}
+function renderTextSensorValue(value) {
+  const v = String(value || "").trim();
+  return v ? v : "Erreur";
+}
+function defaultVatConfigForMode(modeKey) {
+  return { ...(DEFAULT_REMOTE_CONFIG[modeKey] || DEFAULT_REMOTE_CONFIG.REMPLISSAGE) };
+}
+function buildVatConfigMap(compostersList, savedVatConfigMap) {
+  const next = { ...(savedVatConfigMap || {}) };
+  for (const comp of compostersList || []) {
+    if (!next[comp.id]) next[comp.id] = {};
+    for (const vat of (comp.vats || []).slice(0, 4)) {
+      next[comp.id][vat.id] = {
+        ...defaultVatConfigForMode(vat.mode || "REMPLISSAGE"),
+        ...(next[comp.id][vat.id] || {}),
+      };
+    }
+  }
+  return next;
+}
+function buildInitialLiveSensors(compostersList, vatConfigMap) {
+  const out = {};
+  for (const comp of compostersList || []) {
+    out[comp.id] = {};
+    for (const vat of (comp.vats || []).slice(0, 4)) {
+      const cfg = vatConfigMap?.[comp.id]?.[vat.id] || defaultVatConfigForMode(vat.mode || "REMPLISSAGE");
+      out[comp.id][vat.id] = defaultSensorStateFromVat(vat, cfg);
+    }
+  }
+  return out;
+}
+function getVatCapacityKg(vatId) {
+  return vatId === "v4" ? STORAGE_VAT_CAPACITY_KG : DEFAULT_VAT_CAPACITY_KG;
+}
+function toIsoOrNow(value) {
+  const d = value ? new Date(value) : new Date();
+  return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+}
+function computeFillPctFromKg(weightKg, vatId) {
+  const cap = getVatCapacityKg(vatId);
+  if (!Number.isFinite(Number(weightKg)) || cap <= 0) return 0;
+  return clampPct((Number(weightKg) / cap) * 100);
+}
+function ensureVatStatsShape(vat = {}) {
+  return {
+    weightKg: Math.max(0, Number(vat.weightKg ?? 0)),
+    compostReadyKg: Math.max(0, Number(vat.compostReadyKg ?? 0)),
+    fillPct: clampPct(Number(vat.fillPct ?? 0)),
+    cycleStartedAt: vat.cycleStartedAt || null,
+    lastTransferAt: vat.lastTransferAt || null,
+    updatedAt: toIsoOrNow(vat.updatedAt),
+  };
+}
+function buildInitialVatStats(compostersList, liveSensorsMap) {
+  const out = {};
+  for (const comp of compostersList || []) {
+    out[comp.id] = {};
+    for (const vat of (comp.vats || []).slice(0, 4)) {
+      const sensor = liveSensorsMap?.[comp.id]?.[vat.id] || {};
+      const weightKg = Math.max(0, Number(sensor.weightKg ?? 0));
+      out[comp.id][vat.id] = ensureVatStatsShape({
+        weightKg,
+        compostReadyKg: vat.id === "v4" ? weightKg : Math.max(0, Number(sensor.compostReadyKg ?? 0)),
+        fillPct: Number.isFinite(Number(sensor.fillPct)) ? Number(sensor.fillPct) : computeFillPctFromKg(weightKg, vat.id),
+        cycleStartedAt: sensor.cycleStartedAt || null,
+        updatedAt: sensor.updatedAt || new Date().toISOString(),
+      });
+    }
+  }
+  return out;
+}
+function cycleModeFromVatId(vatId) {
+  if (vatId === "v1") return "RAMOLLISSEMENT";
+  if (vatId === "v2") return "DIGESTION_ACTIVE";
+  if (vatId === "v3") return "MATURATION";
+  return "STOCKAGE";
+}
+
+
+/* =========================
+   MOTEURS M1-M9
+========================= */
+const MOTOR_MODES = [
+  { key: "OFF", label: "OFF" },
+  { key: "ON", label: "ON" },
+  { key: "AUTO", label: "AUTO" },
+];
+
+const MOTOR_LIST = Array.from({ length: 9 }, (_, i) => {
+  const id = `M${i + 1}`;
+  const roleById = {
+    M1: "Remonte le compost de la cuve de stockage vers la sortie client (boutique)",
+    M2: "Transition cuve 3 → cuve de récupération / stockage, impulsion 15 s",
+    M3: "Transition cuve 1 → cuve de stockage, impulsion 15 s",
+    M4: "Transition cuve 2 → cuve de stockage, impulsion 15 s",
+    M5: "Mélange cuve 1 : chaque jour + mélange hebdomadaire",
+    M6: "Mélange cuve 3 : chaque jour + mélange hebdomadaire",
+    M7: "Mélange cuve 2 : chaque jour + mélange hebdomadaire",
+    M8: "Aiguilleur/intersection : impulsion courte si une cuve atteint 90%",
+    M9: "Auxiliaire / réserve",
+  };
+  return { id, label: id, role: roleById[id] || "Moteur" };
+});
+
+function defaultMotorConfig() {
+  const out = {};
+  for (const m of MOTOR_LIST) {
+    out[m.id] = {
+      mode: ["M2", "M3", "M4", "M5", "M6", "M7", "M8"].includes(m.id) ? "AUTO" : "OFF",
+      pulseSeconds: ["M2", "M3", "M4"].includes(m.id) ? 15 : (m.id === "M8" ? 3 : 0),
+      kgPerSecond: m.id === "M1" ? 0.05 : 0,
+      dailyEnabled: ["M5", "M6", "M7"].includes(m.id),
+      weeklyMixEnabled: ["M5", "M6", "M7"].includes(m.id),
+      weeklyIntervalDays: ["M5", "M6", "M7"].includes(m.id) ? 7 : 0,
+    };
+  }
+  return out;
+}
+
+function buildMotorConfigMap(compostersList, savedMotorConfigMap) {
+  const next = { ...(savedMotorConfigMap || {}) };
+  for (const comp of compostersList || []) {
+    next[comp.id] = { ...defaultMotorConfig(), ...(next[comp.id] || {}) };
+  }
+  return next;
+}
+
+function ensureMotorRuntime(runtime = {}) {
+  const out = {};
+  for (const m of MOTOR_LIST) {
+    out[m.id] = {
+      activeUntil: runtime?.[m.id]?.activeUntil || null,
+      lastCommandAt: runtime?.[m.id]?.lastCommandAt || null,
+      lastCommand: runtime?.[m.id]?.lastCommand || null,
+    };
+  }
+  return out;
+}
+
+function vatIdForMotor(motorId) {
+  if (motorId === "M3" || motorId === "M5") return "v1";
+  if (motorId === "M4" || motorId === "M7") return "v2";
+  if (motorId === "M2" || motorId === "M6") return "v3";
+  return null;
+}
+
+function getMotorAutoLabel(motorId, vatStatsMap, composterId, remoteCfg) {
+  const now = new Date();
+  const minutesFromMidnight = now.getHours() * 60 + now.getMinutes();
+  const sourceVatId = vatIdForMotor(motorId);
+  const stats = sourceVatId ? ensureVatStatsShape(vatStatsMap?.[composterId]?.[sourceVatId] || {}) : null;
+
+  if (["M5", "M6", "M7"].includes(motorId)) {
+    const elapsedDays = stats?.cycleStartedAt ? Math.max(0, (Date.now() - new Date(stats.cycleStartedAt).getTime()) / 86400000) : 0;
+    const weeklyDue = stats?.cycleStartedAt && Math.floor(elapsedDays) > 0 && Math.floor(elapsedDays) % 7 === 0;
+    if (minutesFromMidnight < 15) return weeklyDue ? "AUTO actif : brassage quotidien + mélange hebdo" : "AUTO actif : brassage quotidien";
+    return weeklyDue ? "AUTO prêt : mélange hebdomadaire aujourd’hui" : "AUTO prêt : brassage 1 fois/jour";
+  }
+
+  if (["M2", "M3", "M4"].includes(motorId)) {
+    const finished = stats?.cycleStartedAt ? isCycleFinished(stats.cycleStartedAt, remoteCfg) : false;
+    return finished ? "AUTO prêt : transfert 15 s vers stockage" : "AUTO attente : transfert en fin de cycle";
+  }
+
+  return "AUTO sans règle programmée";
+}
+
+
+/* =========================
+   VENTILATEURS F1-F3
+========================= */
+const RELAY_FAN_MODES = [
+  { key: "OFF", label: "OFF" },
+  { key: "ON", label: "ON" },
+  { key: "AUTO", label: "AUTO" },
+];
+
+const FAN_LIST = [
+  {
+    id: "F1",
+    label: "Ventilateur 1",
+    vatId: "v1",
+    role: "Relais ventilateur 1",
+  },
+  {
+    id: "F2",
+    label: "Ventilateur 2",
+    vatId: "v2",
+    role: "Relais ventilateur 2",
+  },
+  {
+    id: "F3",
+    label: "Ventilateur 3",
+    vatId: "v3",
+    role: "Relais ventilateur 3",
+  },
+];
+
+function defaultFanConfig() {
+  const out = {};
+  for (const fan of FAN_LIST) {
+    out[fan.id] = {
+      mode: "AUTO",
+      vatId: fan.vatId,
+      tempOnC: 35,
+      tempOffC: 30,
+      humidityOnPct: 80,
+      humidityOffPct: 70,
+      gasOnPpm: 650,
+      gasOffPpm: 450,
+    };
+  }
+  return out;
+}
+
+function buildFanConfigMap(compostersList, savedFanConfigMap) {
+  const next = { ...(savedFanConfigMap || {}) };
+  for (const comp of compostersList || []) {
+    next[comp.id] = { ...defaultFanConfig(), ...(next[comp.id] || {}) };
+  }
+  return next;
+}
+
+function ensureFanRuntime(runtime = {}) {
+  const out = {};
+  for (const fan of FAN_LIST) {
+    out[fan.id] = {
+      state: runtime?.[fan.id]?.state || "OFF",
+      lastCommandAt: runtime?.[fan.id]?.lastCommandAt || null,
+      lastCommand: runtime?.[fan.id]?.lastCommand || null,
+      lastAutoReason: runtime?.[fan.id]?.lastAutoReason || "En attente",
+    };
+  }
+  return out;
+}
+
+function getFanAutoDecision(cfg, sensor = {}) {
+  const tempC = Number(sensor?.tempC);
+  const humidity = Number(sensor?.humidity);
+  const gasPpm = Number(sensor?.gasPpm);
+  const hasTemp = Number.isFinite(tempC);
+  const hasHumidity = Number.isFinite(humidity);
+  const hasGas = Number.isFinite(gasPpm);
+
+  const reasonsOn = [];
+  if (hasTemp && tempC >= Number(cfg?.tempOnC ?? 35)) reasonsOn.push(`température ${tempC.toFixed(1)}°C`);
+  if (hasHumidity && humidity >= Number(cfg?.humidityOnPct ?? 80)) reasonsOn.push(`humidité ${humidity.toFixed(0)}%`);
+  if (hasGas && gasPpm >= Number(cfg?.gasOnPpm ?? 650)) reasonsOn.push(`gaz ${gasPpm.toFixed(0)} ppm`);
+
+  if (reasonsOn.length) return { state: "ON", reason: `AUTO ON : ${reasonsOn.join(" + ")}` };
+
+  const allKnownValuesSafe =
+    (!hasTemp || tempC <= Number(cfg?.tempOffC ?? 30)) &&
+    (!hasHumidity || humidity <= Number(cfg?.humidityOffPct ?? 70)) &&
+    (!hasGas || gasPpm <= Number(cfg?.gasOffPpm ?? 450));
+
+  if (allKnownValuesSafe) return { state: "OFF", reason: "AUTO OFF : valeurs sous les seuils bas" };
+  return { state: "OFF", reason: "AUTO attente : hystérésis entre seuil ON et OFF" };
+}
+
+function getFanAutoLabel(fanId, composterId, fanConfigMap, liveSensorsMap) {
+  const cfg = fanConfigMap?.[composterId]?.[fanId] || defaultFanConfig()[fanId];
+  if (cfg.mode !== "AUTO") return "Commande manuelle";
+  return "AUTO : l’Arduino active ou coupe le relais selon les capteurs";
+}
+
+/* =========================
+   QR USERS (LOCAL DEMO)
+========================= */
+function makeUserId(firstName, lastName) {
+  const f = String(firstName || "").trim().toLowerCase();
+  const l = String(lastName || "").trim().toLowerCase();
+  const base = `${f}_${l}`.replace(/[^a-z0-9_]+/g, "_");
+  return base ? `${base}_${Math.random().toString(16).slice(2, 6)}` : uid("user");
+}
+function buildQrPayload(user) {
+  // Format simple, robuste : JSON
+  return JSON.stringify({ v: 1, type: "GREENLOOP_USER", userId: user.id, firstName: user.firstName, lastName: user.lastName });
+}
+function parseQrPayload(raw) {
+  try {
+    const obj = JSON.parse(String(raw || ""));
+    if (obj?.type === "GREENLOOP_USER" && obj?.userId) return obj;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/* =========================
+   TRAP (DEMO)
+========================= */
+function openTrapDemo() {
+  Alert.alert("✅ Trappe ouverte", "Démo : la trappe (vérin électrique) s’ouvre après scan du QR code.");
+}
+
+
+/* =========================
+   LIVE SENSOR (SIMU)
+========================= */
+function clamp01(n) {
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(1, n));
+}
+function clampPct(n) {
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.min(100, n));
+}
+function approxMove(current, target, speed = 0.12) {
+  // rapproche doucement current vers target
+  const c = Number(current);
+  const t = Number(target);
+  if (!Number.isFinite(c) || !Number.isFinite(t)) return t;
+  return c + (t - c) * speed;
+}
+
+function fanStateFromConfig(cfg, tempC, nowMs) {
+  const mode = cfg?.fanMode || "OFF";
+  const thr = Number(cfg?.fanThresholdTemp ?? 65);
+  const intervalH = Math.max(0.25, Number(cfg?.fanIntervalHours ?? 2));
+  if (mode === "OFF") return "OFF";
+  if (mode === "ON_REG") return tempC >= thr ? "ON" : "OFF";
+  const periodMs = intervalH * 3600_000;
+  const phase = (nowMs % periodMs) / periodMs;
+  return phase < 0.12 ? "ON" : "OFF";
+}
+
+const PROCESS_PHASES = ["RAMOLLISSEMENT", "DIGESTION_ACTIVE", "MATURATION"];
+
+function getPhaseDurationDays(modeKey, remoteCfg) {
+  return Math.max(0, Number(remoteCfg?.[modeKey]?.durationDays ?? DEFAULT_REMOTE_CONFIG[modeKey]?.durationDays ?? 0));
+}
+function getTotalCycleDays(remoteCfg) {
+  return PROCESS_PHASES.reduce((s, key) => s + getPhaseDurationDays(key, remoteCfg), 0);
+}
+function getCurrentProcessMode(cycleStartedAt, remoteCfg) {
+  if (!cycleStartedAt) return "REMPLISSAGE";
+  const elapsedDays = Math.max(0, (Date.now() - new Date(cycleStartedAt).getTime()) / 86400000);
+  let cursor = 0;
+  for (const key of PROCESS_PHASES) {
+    cursor += getPhaseDurationDays(key, remoteCfg);
+    if (elapsedDays < cursor) return key;
+  }
+  return "MATURATION";
+}
+function getRemainingDaysForMode(cycleStartedAt, remoteCfg) {
+  if (!cycleStartedAt) return null;
+  const elapsedDays = Math.max(0, (Date.now() - new Date(cycleStartedAt).getTime()) / 86400000);
+  let cursor = 0;
+  for (const key of PROCESS_PHASES) {
+    cursor += getPhaseDurationDays(key, remoteCfg);
+    if (elapsedDays < cursor) return Math.max(0, cursor - elapsedDays);
+  }
+  return 0;
+}
+function isCycleFinished(cycleStartedAt, remoteCfg) {
+  if (!cycleStartedAt) return false;
+  const elapsedDays = Math.max(0, (Date.now() - new Date(cycleStartedAt).getTime()) / 86400000);
+  return elapsedDays >= getTotalCycleDays(remoteCfg);
+}
+function getPhysicalActionLabel(modeKey, sensorState) {
+  if (sensorState?.transferActive) return "Transfert en cours vers la cuve 4 de stockage";
+  if (modeKey === "REMPLISSAGE") return "En attente du lancement du cycle";
+  if (modeKey === "RAMOLLISSEMENT") return sensorState?.mixOn ? "Mélange du compost en cours" : "Ramollissement en cours";
+  if (modeKey === "DIGESTION_ACTIVE") return sensorState?.mixOn ? "Mélange du compost en cours" : "Digestion active en cours";
+  if (modeKey === "MATURATION") return "Maturation en cours";
+  return "Stockage du compost final";
+}
+
+
+/* =========================
+   MAIN APP
+========================= */
+export default function App() {
+  // Theme
+  const [themeMode, setThemeMode] = useState("dark");
+  const THEME = useMemo(() => (themeMode === "light" ? LIGHT : DARK), [themeMode]);
+  const styles = useMemo(() => makeStyles(THEME), [THEME]);
+  const placeholderColor = THEME.mode === "dark" ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)";
+
+  // Screens
+  const [screen, setScreen] = useState("MAIN"); // MAIN | IMPACT | BOUTIQUE | LIVE | CONNECTION | IDENTITYQR | AUTH
+  const [liveSubTab, setLiveSubTab] = useState("CUVES"); // CUVES | CUVE4
+
+  // Drawer
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerX = useRef(new Animated.Value(-SCREEN_W)).current;
+  const overlayA = useRef(new Animated.Value(0)).current;
+
+  function openDrawer() {
+    setDrawerOpen(true);
+    Animated.parallel([
+      Animated.timing(drawerX, {
+        toValue: 0,
+        duration: 220,
+        useNativeDriver: true,
+        easing: Easing.out(Easing.cubic),
+      }),
+      Animated.timing(overlayA, {
+        toValue: 1,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }
+
+  function closeDrawer() {
+    Animated.parallel([
+      Animated.timing(drawerX, {
+        toValue: -SCREEN_W,
+        duration: 200,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.cubic),
+      }),
+      Animated.timing(overlayA, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setDrawerOpen(false));
+  }
+
+  const [drawerPage, setDrawerPage] = useState("HOME"); // HOME | IDENTIFY | SETTINGS | ADMIN
+
+  // Session admin
+  const [session, setSession] = useState(null);
+  const [adminPin, setAdminPin] = useState(DEFAULT_ADMIN_PIN);
+  const [cardIp, setCardIp] = useState("http://192.168.4.1");
+  const [cardConnected, setCardConnected] = useState(false);
+  const [liveWeightKg, setLiveWeightKg] = useState(0);
+  const [weightRaw, setWeightRaw] = useState(0);
+  const [weightLoading, setWeightLoading] = useState(false);
+  const [pinInput, setPinInput] = useState("");
+
+  // Users (local)
+  const [users, setUsers] = useState({});
+  const [currentUserId, setCurrentUserId] = useState(null);
+
+  // Profil (utilisateur courant)
+  const [profile, setProfile] = useState({ firstName: "", lastName: "", zip: "" });
+  const [profileValidated, setProfileValidated] = useState(false);
+
+  // === IDENTITÉ + QR (helpers) ===
+  function normalizeName(v) {
+    return String(v || "").trim().toLowerCase();
+  }
+
+  const validateIdentityProfile = useCallback(() => {
+    const fRaw = String(profile.firstName || "").trim();
+    const lRaw = String(profile.lastName || "").trim();
+    const zRaw = String(profile.zip || "").trim();
+
+    if (!fRaw || !lRaw || !zRaw) {
+      Alert.alert("Champs requis", "Remplis prénom, nom et code postal puis appuie sur Valider.");
+      return;
+    }
+
+    const f = normalizeName(fRaw);
+    const l = normalizeName(lRaw);
+
+    // Cherche un utilisateur existant (prénom+nom)
+    const found = Object.values(users || {}).find(
+      (u) => normalizeName(u.firstName) === f && normalizeName(u.lastName) === l
+    );
+
+    if (found) {
+      // met à jour le code postal si nécessaire
+      if (zRaw && (!found.zip || String(found.zip).trim() !== zRaw)) {
+        setUsers((prev) => ({ ...prev, [found.id]: { ...(prev[found.id] || {}), zip: zRaw } }));
+      }
+      setCurrentUserId(found.id);
+      setDeposits(Array.isArray(found.deposits) ? found.deposits : []);
+      setSpentPoints(Number(found.spentPoints) || 0);
+      setProfile({ firstName: String(found.firstName || ""), lastName: String(found.lastName || ""), zip: String(zRaw || found.zip || "") });
+      setProfileValidated(true);
+      return;
+    }
+
+    // Crée un nouveau compte uniquement au clic "Valider"
+    const id = makeUserId(fRaw, lRaw);
+    const nu = { id, firstName: fRaw, lastName: lRaw, zip: zRaw, deposits: [], spentPoints: 0 };
+    setUsers((prev) => ({ ...prev, [id]: nu }));
+    setCurrentUserId(id);
+    setDeposits([]);
+    setSpentPoints(0);
+    setProfileValidated(true);
+  }, [profile.firstName, profile.lastName, profile.zip, users]);
+
+
+  const deleteUser = useCallback(
+    (userId) => {
+      Alert.alert("Supprimer", "Supprimer ce compte utilisateur ? (points & historique)", [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => {
+            setUsers((prev) => {
+              const next = { ...(prev || {}) };
+              delete next[userId];
+              return next;
+            });
+
+            if (userId === currentUserId) {
+              const remaining = Object.keys(users || {}).filter((id) => id !== userId);
+              const nextId = remaining.length ? remaining[0] : null;
+              setCurrentUserId(nextId);
+
+              if (nextId && users?.[nextId]) {
+                const u = users[nextId];
+                setProfile({ firstName: u.firstName || "", lastName: u.lastName || "", zip: u.zip || "" });
+                        setProfileValidated(true);
+                setProfileValidated(true);
+                setDeposits(Array.isArray(u.deposits) ? u.deposits : []);
+                setSpentPoints(Number(u.spentPoints) || 0);
+              } else {
+                setProfile({ firstName: "", lastName: "", zip: "" });
+                setDeposits([]);
+                setSpentPoints(0);
+                setProfileValidated(false);
+              }
+            }
+          },
+        },
+      ]);
+    },
+    [currentUserId, users]
+  );
+
+
+  // Data + location
+  const [userCoords, setUserCoords] = useState(DEFAULT_USER_COORDS);
+  const [hasLocation, setHasLocation] = useState(false);
+  const [composters, setComposters] = useState([]);
+  const [deposits, setDeposits] = useState([]);
+
+  // Boutique
+  const [spentPoints, setSpentPoints] = useState(0);
+
+  // Pilotage à distance
+  const [remoteConfig, setRemoteConfig] = useState(DEFAULT_REMOTE_CONFIG);
+  const [vatConfigMap, setVatConfigMap] = useState({});
+  const [remoteTab, setRemoteTab] = useState("TEMP"); // TEMP | HUMID | CO2 | GAS | FAN | CYCLE | MELANGE
+  const [remoteModeKey, setRemoteModeKey] = useState("REMPLISSAGE");
+  const [selectedPilotVatId, setSelectedPilotVatId] = useState("v1");
+  const [lastPush, setLastPush] = useState(null);
+
+  // Tabs user
+  const [activeTab, setActiveTab] = useState("ACCUEIL"); // ACCUEIL | CARTE | DEPOTS | CLASSEMENT
+
+  // ✅ Admin tabs (CUVES supprimé)
+  const [adminTab, setAdminTab] = useState("DASH"); // DASH | PILOTAGE | MOTEURS | VENTILATEURS | COMPOSTEURS
+
+  // Form dépôt
+  const [selectedComposterId, setSelectedComposterId] = useState(null);
+  const [wasteKg, setWasteKg] = useState("");
+  const [note, setNote] = useState("");
+
+  // Admin create composter fields
+  const [aName, setAName] = useState("");
+  const [aAddress, setAAddress] = useState("");
+  const [aLat, setALat] = useState("");
+  const [aLon, setALon] = useState("");
+
+  // Boot
+  const [booting, setBooting] = useState(true);
+  const bootP = useRef(new Animated.Value(0)).current;
+
+  // ✅ capteurs temps réel (SIMU)
+  // structure: { [composterId]: { [vatId]: { tempC, humidity, airQuality, co2Ppm, gasPpm, fan, action, fillPct?, updatedAt } } }
+  const [liveSensors, setLiveSensors] = useState({});
+  const [vatStats, setVatStats] = useState({});
+  const [motorConfigMap, setMotorConfigMap] = useState({});
+  const [motorRuntimeMap, setMotorRuntimeMap] = useState({});
+  const [fanConfigMap, setFanConfigMap] = useState({});
+  const [fanRuntimeMap, setFanRuntimeMap] = useState({});
+
+  useEffect(() => {
+    Animated.timing(bootP, { toValue: 1, duration: 3000, useNativeDriver: false, easing: Easing.linear }).start(() => setBooting(false));
+  }, [bootP]);
+
+  // Load data
+  useEffect(() => {
+    (async () => {
+      const [
+        savedTheme,
+        savedProfile,
+        savedUsers,
+        savedCurrentUser,
+        savedPin,
+        savedSession,
+        savedComposters,
+        savedDeposits,
+        savedSpentPoints,
+        savedRemoteConfig,
+        savedLastPush,
+        savedVatConfig,
+        savedVatStats,
+        savedMotorConfig,
+        savedMotorRuntime,
+        savedFanConfig,
+        savedFanRuntime,
+      ] = await Promise.all([
+        readJSON(K_THEME, "dark"),
+        readJSON(K_PROFILE, { firstName: "", lastName: "", zip: "" }),
+        readJSON(K_USERS, null),
+        readJSON(K_CURRENT_USER, null),
+        readJSON(K_ADMIN_PIN, DEFAULT_ADMIN_PIN),
+        readJSON(K_SESSION, null),
+        readJSON(K_COMPOSTERS, null),
+        readJSON(K_DEPOSITS, []),
+        readJSON(K_SPENT_POINTS, 0),
+        readJSON(K_REMOTE_CONFIG, DEFAULT_REMOTE_CONFIG),
+        readJSON(K_LAST_PUSH, null),
+        readJSON(K_VAT_CONFIG, {}),
+        readJSON(K_VAT_STATS, {}),
+        readJSON(K_MOTOR_CONFIG, {}),
+        readJSON(K_MOTOR_RUNTIME, {}),
+        readJSON(K_FAN_CONFIG, {}),
+        readJSON(K_FAN_RUNTIME, {}),
+      ]);
+
+      setThemeMode(savedTheme === "light" ? "light" : "dark");
+
+      // Users (migration simple)
+      let uMap = (savedUsers && typeof savedUsers === "object") ? savedUsers : null;
+      if (!uMap || !Object.keys(uMap).length) {
+        const baseProfile = savedProfile || { firstName: "", lastName: "", zip: "" };
+        const id = makeUserId(baseProfile.firstName, baseProfile.lastName);
+        uMap = {
+          [id]: {
+            id,
+            firstName: baseProfile.firstName || "",
+            lastName: baseProfile.lastName || "",
+            zip: baseProfile.zip || "",
+            deposits: [],
+            spentPoints: 0,
+          },
+        };
+      }
+      const firstId = savedCurrentUser && uMap[savedCurrentUser] ? savedCurrentUser : Object.keys(uMap)[0];
+      const activeUser = uMap[firstId];
+      setUsers(uMap);
+      setCurrentUserId(firstId);
+      setProfile({ firstName: activeUser?.firstName || "", lastName: activeUser?.lastName || "", zip: activeUser?.zip || "" });
+
+      setDeposits(Array.isArray(activeUser?.deposits) ? activeUser.deposits : []);
+      setSpentPoints(Number(activeUser?.spentPoints) || 0);
+      setAdminPin(String(savedPin || DEFAULT_ADMIN_PIN));
+      setSession(savedSession);
+      setRemoteConfig(savedRemoteConfig || DEFAULT_REMOTE_CONFIG);
+      setLastPush(savedLastPush);
+
+      const initialComposters =
+        Array.isArray(savedComposters) && savedComposters.length ? savedComposters : SEED_COMPOSTERS;
+
+      const compostersWithVats = initialComposters.map((c) => {
+        const vats = Array.isArray(c.vats) ? c.vats.slice(0, 4) : [];
+        return {
+          ...c,
+          vats: [
+            vats[0] || { id: "v1", label: "Cuve 1", tempC: 40, mode: "REMPLISSAGE" },
+            vats[1] || { id: "v2", label: "Cuve 2", tempC: 55, mode: "MATURATION" },
+            vats[2] || { id: "v3", label: "Cuve 3", tempC: 30, mode: "PRET" },
+            vats[3] || { id: "v4", label: "Cuve 4 (récup.)", tempC: 26, mode: "PRET" },
+          ].map((v) => ({ ...v, tempC: Number.isFinite(Number(v.tempC)) ? Number(v.tempC) : 0 })),
+        };
+      });
+
+      const nextVatConfigMap = buildVatConfigMap(compostersWithVats, savedVatConfig || {});
+      setVatConfigMap(nextVatConfigMap);
+      const initialLiveSensors = buildInitialLiveSensors(compostersWithVats, nextVatConfigMap);
+      setLiveSensors(initialLiveSensors);
+      setVatStats({ ...(buildInitialVatStats(compostersWithVats, initialLiveSensors)), ...(savedVatStats || {}) });
+      const nextMotorConfigMap = buildMotorConfigMap(compostersWithVats, savedMotorConfig || {});
+      setMotorConfigMap(nextMotorConfigMap);
+      setMotorRuntimeMap(Object.fromEntries(compostersWithVats.map((c) => [c.id, ensureMotorRuntime(savedMotorRuntime?.[c.id] || {})])));
+      const nextFanConfigMap = buildFanConfigMap(compostersWithVats, savedFanConfig || {});
+      setFanConfigMap(nextFanConfigMap);
+      setFanRuntimeMap(Object.fromEntries(compostersWithVats.map((c) => [c.id, ensureFanRuntime(savedFanRuntime?.[c.id] || {})])));
+      setComposters(compostersWithVats);
+      setSelectedComposterId(compostersWithVats?.[0]?.id ?? null);
+      setSelectedPilotVatId("v1");
+
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          setUserCoords({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+          setHasLocation(true);
+        } else {
+          setHasLocation(false);
+        }
+      } catch {
+        setHasLocation(false);
+      }
+    })();
+  }, []);
+
+  // Persist
+  useEffect(() => { writeJSON(K_THEME, themeMode).catch(() => {}); }, [themeMode]);
+  useEffect(() => { writeJSON(K_PROFILE, profile).catch(() => {}); }, [profile]);
+  useEffect(() => { writeJSON(K_USERS, users).catch(() => {}); }, [users]);
+  useEffect(() => { writeJSON(K_CURRENT_USER, currentUserId).catch(() => {}); }, [currentUserId]);
+  useEffect(() => { writeJSON(K_ADMIN_PIN, adminPin).catch(() => {}); }, [adminPin]);
+  useEffect(() => { writeJSON(K_SESSION, session).catch(() => {}); }, [session]);
+  useEffect(() => { writeJSON(K_COMPOSTERS, composters).catch(() => {}); }, [composters]);
+  useEffect(() => { writeJSON(K_DEPOSITS, deposits).catch(() => {}); }, [deposits]);
+  useEffect(() => {
+    if (!currentUserId) return;
+    setUsers((prev) => ({
+      ...prev,
+      [currentUserId]: { ...(prev[currentUserId] || {}), deposits: Array.isArray(deposits) ? deposits : [] },
+    }));
+  }, [deposits, currentUserId]);
+  useEffect(() => { writeJSON(K_SPENT_POINTS, spentPoints).catch(() => {}); }, [spentPoints]);
+  useEffect(() => {
+    if (!currentUserId) return;
+    setUsers((prev) => ({
+      ...prev,
+      [currentUserId]: { ...(prev[currentUserId] || {}), spentPoints: Number(spentPoints) || 0 },
+    }));
+  }, [spentPoints, currentUserId]);
+  useEffect(() => { writeJSON(K_REMOTE_CONFIG, remoteConfig).catch(() => {}); }, [remoteConfig]);
+  useEffect(() => { writeJSON(K_VAT_CONFIG, vatConfigMap).catch(() => {}); }, [vatConfigMap]);
+  useEffect(() => { writeJSON(K_VAT_STATS, vatStats).catch(() => {}); }, [vatStats]);
+  useEffect(() => { writeJSON(K_MOTOR_CONFIG, motorConfigMap).catch(() => {}); }, [motorConfigMap]);
+  useEffect(() => { writeJSON(K_MOTOR_RUNTIME, motorRuntimeMap).catch(() => {}); }, [motorRuntimeMap]);
+  useEffect(() => { writeJSON(K_FAN_CONFIG, fanConfigMap).catch(() => {}); }, [fanConfigMap]);
+  useEffect(() => { writeJSON(K_FAN_RUNTIME, fanRuntimeMap).catch(() => {}); }, [fanRuntimeMap]);
+  useEffect(() => { writeJSON(K_LAST_PUSH, lastPush).catch(() => {}); }, [lastPush]);
+
+  const selectedComposter = useMemo(
+    () => composters.find((c) => c.id === selectedComposterId) ?? null,
+    [composters, selectedComposterId]
+  );
+  const selectedPilotVat = useMemo(
+    () => selectedComposter?.vats?.find((v) => v.id === selectedPilotVatId) ?? selectedComposter?.vats?.[0] ?? null,
+    [selectedComposter, selectedPilotVatId]
+  );
+  const selectedPilotVatConfig = useMemo(() => {
+    if (!selectedComposter || !selectedPilotVat) return remoteConfig[remoteModeKey] || DEFAULT_REMOTE_CONFIG[remoteModeKey];
+    return vatConfigMap?.[selectedComposter.id]?.[selectedPilotVat.id] || defaultVatConfigForMode(selectedPilotVat.mode || remoteModeKey);
+  }, [selectedComposter, selectedPilotVat, vatConfigMap, remoteConfig, remoteModeKey]);
+
+  const nearest = useMemo(() => {
+    if (!composters.length) return null;
+    let best = null;
+    for (const c of composters) {
+      const d = kmBetween(userCoords, { latitude: c.latitude, longitude: c.longitude });
+      if (!best || d < best.distKm) best = { ...c, distKm: d };
+    }
+    return best;
+  }, [composters, userCoords]);
+
+  const earnedPoints = useMemo(() => deposits.reduce((s, d) => s + pointsFromDepositKg(d.wasteKg || 0), 0), [deposits]);
+  const totalPoints = useMemo(() => Math.max(0, earnedPoints - (Number(spentPoints) || 0)), [earnedPoints, spentPoints]);
+
+  const leaderboard = useMemo(() => {
+    const list = Object.values(users || {}).map((u) => {
+      const earned = (Array.isArray(u?.deposits) ? u.deposits : []).reduce(
+        (s, d) => s + pointsFromDepositKg(d?.wasteKg || 0),
+        0
+      );
+      const spent = Number(u?.spentPoints) || 0;
+      const points = Math.max(0, earned - spent);
+      const name = `${u?.firstName || ""} ${u?.lastName || ""}`.trim() || "Utilisateur";
+      return { id: u.id, name, points };
+    });
+
+    // Petits "bots" optionnels pour remplir le classement (démo)
+    const base = list.length ? Math.max(...list.map((x) => x.points)) : 0;
+    const bots = [
+      { id: "b1", name: "Alex", points: Math.max(0, Math.round(base * 0.9) + 30) },
+      { id: "b2", name: "Maya", points: Math.max(0, Math.round(base * 1.15) + 10) },
+      { id: "b3", name: "Nolan", points: Math.max(0, Math.round(base * 0.75) + 55) },
+    ];
+
+    return [...list, ...bots]
+      .sort((a, b) => b.points - a.points)
+      .map((x, i) => ({ ...x, rank: i + 1 }));
+  }, [users]);
+
+  const isAdmin = session?.role === "ADMIN";
+
+  const impact = useMemo(() => {
+    const totalWasteKg = deposits.reduce((s, d) => s + (Number(d.wasteKg) || 0), 0);
+    const totalCompostKg = deposits.reduce((s, d) => s + (Number(d.compostKg) || 0), 0);
+    const co2AvoidedKg = totalWasteKg * 0.25;
+    const collectionsAvoided = Math.floor(totalWasteKg / 20);
+    const biodiversityPct = Math.max(10, Math.min(99, Math.round(35 + (totalWasteKg / 60) * 60)));
+    return { totalWasteKg, totalCompostKg, co2AvoidedKg, collectionsAvoided, biodiversityPct };
+  }, [deposits]);
+
+
+
+  async function fetchWeightFromCard(showLoader = false) {
+    if (!String(cardIp || '').trim()) return false;
+    try {
+      if (showLoader) setWeightLoading(true);
+      const data = await apiRequest(cardIp, "/weight", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      const kg = Number(data?.weightKg ?? data?.weight_kg ?? 0);
+      const raw = Number(data?.raw ?? 0);
+      setLiveWeightKg(Number.isFinite(kg) ? kg : 0);
+      setWeightRaw(Number.isFinite(raw) ? raw : 0);
+      setWasteKg(Number.isFinite(kg) ? String(kg.toFixed(3)) : "0");
+      setCardConnected(true);
+      return true;
+    } catch {
+      try {
+        const fallback = await apiRequest(cardIp, "/status", { method: "GET" });
+        const kg = Number(fallback?.weightKg ?? fallback?.weight_kg ?? 0);
+        const raw = Number(fallback?.raw ?? 0);
+        setLiveWeightKg(Number.isFinite(kg) ? kg : 0);
+        setWeightRaw(Number.isFinite(raw) ? raw : 0);
+        if (Number.isFinite(kg)) setWasteKg(String(kg.toFixed(3)));
+        setCardConnected(true);
+        return true;
+      } catch {
+        try {
+          const gasData = await apiRequest(cardIp, "/data", { method: "GET" });
+          const hasGasValue = [gasData?.mq2_1, gasData?.mq2_2, gasData?.mq2_3, gasData?.mq2_4].some((v) => Number.isFinite(Number(v)));
+          setCardConnected(!!hasGasValue);
+          return !!hasGasValue;
+        } catch {
+          try {
+            await withTimeout(fetch(String(cardIp || '').replace(/\/+$/, '')), 5000);
+            setCardConnected(true);
+          } catch {
+            setCardConnected(false);
+          }
+          return false;
+        }
+      }
+    } finally {
+      if (showLoader) setWeightLoading(false);
+    }
+  }
+
+  async function tareWeightOnCard() {
+    if (!String(cardIp || '').trim()) return;
+    try {
+      await apiRequest(cardIp, "/tare", { method: "GET" });
+      setLiveWeightKg(0);
+      setWeightRaw(0);
+      setWasteKg("0");
+      Alert.alert("✅ Balance", "Tare effectuée sur la carte.");
+      fetchWeightFromCard();
+    } catch (e) {
+      Alert.alert("Erreur", `Impossible de faire la tare : ${e.message}`);
+    }
+  }
+
+  async function relayOnForDeposit() {
+    try {
+      await apiRequest(cardIp, "/relay/on", { method: "GET" });
+      setCardConnected(true);
+    } catch (e) {
+      setCardConnected(false);
+      Alert.alert("Carte non connectée", `Impossible d'activer le relais : ${e.message}`);
+      return false;
+    }
+    return true;
+  }
+
+  async function relayOffDelayForDeposit() {
+    try {
+      await apiRequest(cardIp, "/relay/off-delay", { method: "GET" });
+      setCardConnected(true);
+    } catch {
+      setCardConnected(false);
+    }
+  }
+
+  async function openNewDeposit() {
+    const ok = await relayOnForDeposit();
+    if (!ok) return;
+    await fetchWeightFromCard(true);
+    setScreen("NEW_DEPOT");
+  }
+
+  async function closeNewDeposit() {
+    relayOffDelayForDeposit();
+    setScreen("MAIN");
+  }
+
+  useEffect(() => {
+    let mounted = true;
+
+    const syncFromCard = async () => {
+      const ok = await fetchWeightFromCard();
+      if (!mounted) return;
+      if (!ok) return;
+
+      let sensorsLoaded = false;
+
+      try {
+        const sensorsPayload = await apiRequest(cardIp, "/api/sensors");
+        if (!mounted) return;
+        const incomingComposters = Array.isArray(sensorsPayload?.composters) ? sensorsPayload.composters : [];
+
+        if (incomingComposters.length) {
+          sensorsLoaded = true;
+
+          setLiveSensors((prev) => {
+            const next = { ...prev };
+            for (const comp of incomingComposters) {
+              if (!next[comp.id]) next[comp.id] = {};
+              const localComp = composters.find((c) => c.id === comp.id) || comp;
+              const vats = Array.isArray(comp.vats) ? comp.vats : localComp?.vats || [];
+              for (const vat of vats.slice(0, 4)) {
+                next[comp.id][vat.id] = normalizeIncomingSensor(vat.sensor || vat, vat);
+              }
+            }
+            return next;
+          });
+
+          setVatStats((prev) => {
+            const next = { ...prev };
+            for (const comp of incomingComposters) {
+              if (!next[comp.id]) next[comp.id] = {};
+              const localComp = composters.find((c) => c.id === comp.id) || comp;
+              const vats = Array.isArray(comp.vats) ? comp.vats : localComp?.vats || [];
+              for (const vat of vats.slice(0, 4)) {
+                const normalized = normalizeIncomingSensor(vat.sensor || vat, vat);
+                const prevVat = ensureVatStatsShape(prev?.[comp.id]?.[vat.id] || {});
+                const weightKg = normalized.weightKg > 0 ? normalized.weightKg : prevVat.weightKg;
+                next[comp.id][vat.id] = ensureVatStatsShape({
+                  ...prevVat,
+                  weightKg,
+                  compostReadyKg: normalized.compostReadyKg > 0 ? normalized.compostReadyKg : prevVat.compostReadyKg,
+                  fillPct: normalized.fillPct,
+                  cycleStartedAt: normalized.cycleStartedAt || prevVat.cycleStartedAt,
+                  updatedAt: normalized.updatedAt || new Date().toISOString(),
+                });
+              }
+            }
+            return next;
+          });
+        }
+      } catch {
+        // on essaie ensuite la route simple /data pour les 4 MQ-2
+      }
+
+      if (!sensorsLoaded) {
+        try {
+          const gasData = await apiRequest(cardIp, "/data", { method: "GET" });
+          if (!mounted) return;
+
+          const sensorMap = {
+            v1: {
+              tempC: Number(gasData?.temp1),
+              humidity: Number(gasData?.hum1),
+              gasPpm: Number(gasData?.mq2_1),
+            },
+            v2: {
+              tempC: Number(gasData?.temp2),
+              humidity: Number(gasData?.hum2),
+              gasPpm: Number(gasData?.mq2_2),
+            },
+            v3: {
+              tempC: Number(gasData?.temp3),
+              humidity: Number(gasData?.hum3),
+              gasPpm: Number(gasData?.mq2_3),
+            },
+            v4: {
+              tempC: Number(gasData?.temp4),
+              humidity: Number(gasData?.hum4),
+              gasPpm: Number(gasData?.mq2_4),
+            },
+          };
+
+          const validTemp = (v) => Number.isFinite(v) && v >= -20 && v <= 90;
+          const validHum = (v) => Number.isFinite(v) && v >= 0 && v <= 100;
+          const validGas = (v) => Number.isFinite(v) && v >= 0 && v <= 10000;
+
+          setLiveSensors((prev) => {
+            const next = { ...prev };
+            for (const comp of composters) {
+              if (!next[comp.id]) next[comp.id] = {};
+              for (const vat of (comp.vats || []).slice(0, 4)) {
+                const values = sensorMap[vat.id] || {};
+                const current = next[comp.id][vat.id] || defaultSensorStateFromVat(vat, {});
+                const hasTemp = validTemp(values.tempC);
+                const hasHum = validHum(values.humidity);
+                const hasGas = validGas(values.gasPpm);
+
+                next[comp.id][vat.id] = {
+                  ...current,
+                  tempC: hasTemp ? values.tempC : null,
+                  humidity: hasHum ? values.humidity : null,
+                  gasPpm: hasGas ? values.gasPpm : null,
+                  updatedAt: new Date().toISOString(),
+                  online: hasTemp || hasHum || hasGas,
+                  sensorErrors: {
+                    ...(current.sensorErrors || {}),
+                    tempC: !hasTemp,
+                    humidity: !hasHum,
+                    gasPpm: !hasGas,
+                  },
+                  action: (hasTemp || hasHum || hasGas)
+                    ? "Données capteurs reçues depuis la carte"
+                    : (current.action || "En attente de données carte"),
+                };
+              }
+            }
+            return next;
+          });
+        } catch {
+          // on garde les dernières valeurs affichées
+        }
+      }
+    };
+
+    syncFromCard();
+    const id = setInterval(syncFromCard, 3000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, [cardIp, composters]);
+
+  useEffect(() => {
+    if (!composters.length) return;
+    setVatConfigMap((prev) => buildVatConfigMap(composters, prev));
+    setLiveSensors((prev) => {
+      const next = { ...prev };
+      for (const c of composters) {
+        if (!next[c.id]) next[c.id] = {};
+        for (const v of (c.vats || []).slice(0, 4)) {
+          if (!next[c.id][v.id]) {
+            const cfg = vatConfigMap?.[c.id]?.[v.id] || defaultVatConfigForMode(v.mode || "REMPLISSAGE");
+            next[c.id][v.id] = defaultSensorStateFromVat(v, cfg);
+          }
+        }
+      }
+      return next;
+    });
+    setVatStats((prev) => {
+      const next = { ...prev };
+      for (const c of composters) {
+        if (!next[c.id]) next[c.id] = {};
+        for (const v of (c.vats || []).slice(0, 4)) {
+          if (!next[c.id][v.id]) next[c.id][v.id] = ensureVatStatsShape({ updatedAt: new Date().toISOString() });
+        }
+      }
+      return next;
+    });
+  }, [composters]);
+
+  useEffect(() => {
+    if (!composters.length) return;
+    setMotorConfigMap((prev) => buildMotorConfigMap(composters, prev));
+    setMotorRuntimeMap((prev) => {
+      const next = { ...prev };
+      for (const c of composters) {
+        if (!next[c.id]) next[c.id] = ensureMotorRuntime({});
+      }
+      return next;
+    });
+  }, [composters]);
+
+  useEffect(() => {
+    if (!composters.length) return;
+    setFanConfigMap((prev) => buildFanConfigMap(composters, prev));
+    setFanRuntimeMap((prev) => {
+      const next = { ...prev };
+      for (const c of composters) {
+        if (!next[c.id]) next[c.id] = ensureFanRuntime({});
+      }
+      return next;
+    });
+  }, [composters]);
+
+  useEffect(() => {
+    if (!composters.length) return;
+    const tick = setInterval(() => {
+      const nowIso = new Date().toISOString();
+      setVatStats((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const comp of composters) {
+          const compId = comp.id;
+          if (!next[compId]) next[compId] = {};
+          const storage = ensureVatStatsShape(next[compId]?.v4 || {});
+          let storageWeightKg = storage.weightKg;
+          let storageChanged = false;
+
+          for (const vat of (comp.vats || []).slice(0, 3)) {
+            const current = ensureVatStatsShape(next[compId]?.[vat.id] || {});
+            const vatCfg = vatConfigMap?.[compId]?.[vat.id] || defaultVatConfigForMode(vat.mode || cycleModeFromVatId(vat.id));
+            const currentMode = vat.mode || cycleModeFromVatId(vat.id);
+            const shouldAutoStart = currentMode === "REMPLISSAGE" && current.weightKg > 0 && current.fillPct >= Number(vatCfg.fillStartThresholdPct ?? 100) && !!vatCfg.autoStartWhenFull;
+            if (!current.cycleStartedAt && shouldAutoStart) {
+              next[compId][vat.id] = ensureVatStatsShape({
+                ...current,
+                cycleStartedAt: nowIso,
+                updatedAt: nowIso,
+              });
+              changed = true;
+              continue;
+            }
+
+            if (current.cycleStartedAt && isCycleFinished(current.cycleStartedAt, remoteConfig)) {
+              const transferKg = Math.max(0, Number(current.compostReadyKg || current.weightKg * DEFAULT_TRANSFER_RATIO));
+              if (transferKg > 0) {
+                storageWeightKg += transferKg;
+                storageChanged = true;
+              }
+              next[compId][vat.id] = ensureVatStatsShape({
+                weightKg: 0,
+                compostReadyKg: 0,
+                fillPct: 0,
+                cycleStartedAt: null,
+                lastTransferAt: nowIso,
+                updatedAt: nowIso,
+              });
+              changed = true;
+            }
+          }
+
+          if (storageChanged) {
+            next[compId].v4 = ensureVatStatsShape({
+              ...storage,
+              weightKg: storageWeightKg,
+              compostReadyKg: storageWeightKg,
+              fillPct: computeFillPctFromKg(storageWeightKg, "v4"),
+              updatedAt: nowIso,
+            });
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    }, 5000);
+    return () => clearInterval(tick);
+  }, [composters, vatConfigMap, remoteConfig]);
+
+  useEffect(() => {
+    if (!composters.length) return;
+    setLiveSensors((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const comp of composters) {
+        if (!next[comp.id]) next[comp.id] = {};
+        for (const vat of (comp.vats || []).slice(0, 4)) {
+          const stats = ensureVatStatsShape(vatStats?.[comp.id]?.[vat.id] || {});
+          const currentMode = vat.id === "v4" ? "STOCKAGE" : (stats.cycleStartedAt ? getCurrentProcessMode(stats.cycleStartedAt, remoteConfig) : (vat.mode || "REMPLISSAGE"));
+          const vatCfg = vatConfigMap?.[comp.id]?.[vat.id] || defaultVatConfigForMode(currentMode);
+          const modeForTargets = defaultVatConfigForMode(currentMode);
+          const currentSensor = next[comp.id][vat.id] || defaultSensorStateFromVat(vat, vatCfg);
+          const remainingDays = vat.id === "v4" ? null : (stats.cycleStartedAt ? getRemainingDaysForMode(stats.cycleStartedAt, remoteConfig) : null);
+          const patch = {
+            ...currentSensor,
+            weightKg: stats.weightKg,
+            compostReadyKg: stats.compostReadyKg,
+            fillPct: computeFillPctFromKg(stats.weightKg, vat.id),
+            currentMode,
+            cycleStartedAt: stats.cycleStartedAt,
+            remainingDays,
+            updatedAt: stats.updatedAt || currentSensor.updatedAt || new Date().toISOString(),
+            action: vat.id === "v4"
+              ? `Stockage disponible : ${stats.weightKg.toFixed(2)} kg`
+              : getPhysicalActionLabel(currentMode, {
+                  ...currentSensor,
+                  transferActive: !!stats.lastTransferAt && (Date.now() - new Date(stats.lastTransferAt).getTime()) < 60000,
+                  mixOn: !!vatCfg.mixImmediate,
+                }),
+            fan: currentSensor.sensorErrors?.fan ? null : (currentSensor.fan || fanStateFromConfig(modeForTargets, currentSensor.tempC, Date.now())),
+            online: currentSensor.online,
+            sensorErrors: {
+              ...(currentSensor.sensorErrors || {}),
+              fan: !!currentSensor.sensorErrors?.fan,
+            },
+          };
+          const currentJson = JSON.stringify(currentSensor);
+          const patchJson = JSON.stringify(patch);
+          if (currentJson !== patchJson) {
+            next[comp.id][vat.id] = patch;
+            changed = true;
+          }
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [vatStats, composters, vatConfigMap, remoteConfig]);
+
+  useEffect(() => {
+    if (!composters.length) return;
+    setFanRuntimeMap((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const comp of composters) {
+        const compId = comp.id;
+        const compFans = fanConfigMap?.[compId] || defaultFanConfig();
+        if (!next[compId]) next[compId] = ensureFanRuntime({});
+        for (const fan of FAN_LIST) {
+          const cfg = compFans[fan.id] || defaultFanConfig()[fan.id];
+          const current = next[compId]?.[fan.id] || ensureFanRuntime({})[fan.id];
+          let targetState = current.state || "OFF";
+          let reason = "Commande manuelle";
+          if (cfg.mode === "ON") {
+            targetState = "ON";
+            reason = "Commande manuelle ON";
+          } else if (cfg.mode === "OFF") {
+            targetState = "OFF";
+            reason = "Commande manuelle OFF";
+          } else {
+            const decision = getFanAutoDecision(cfg, liveSensors?.[compId]?.[cfg.vatId] || {});
+            targetState = decision.state;
+            reason = decision.reason;
+          }
+          if (current.state !== targetState || current.lastAutoReason !== reason) {
+            next[compId] = {
+              ...ensureFanRuntime(next[compId] || {}),
+              [fan.id]: {
+                ...current,
+                state: targetState,
+                lastAutoReason: reason,
+              },
+            };
+            changed = true;
+          }
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [composters, fanConfigMap, liveSensors]);
+
+function signOutAdmin() {
+    setSession(null);
+    setAdminTab("DASH");
+    setActiveTab("ACCUEIL");
+    closeDrawer();
+  }
+
+  function enterAdminFromDrawer() {
+    const pin = String(pinInput || "").trim();
+    if (!pin) return Alert.alert("PIN requis", "Entre le code admin.");
+    if (pin !== String(adminPin)) return Alert.alert("Erreur", "PIN incorrect.");
+    setSession(ADMIN);
+    setPinInput("");
+    closeDrawer();
+  }
+
+  async function onCreateDeposit() {
+    if (!selectedComposter) {
+      Alert.alert("Erreur", "Sélectionne un composteur.");
+      return;
+    }
+    const kg = Number(String(wasteKg).replace(",", "."));
+    if (!cardConnected) {
+      Alert.alert("Carte non connectée", "Connecte la carte pour récupérer automatiquement le poids du capteur.");
+      return;
+    }
+    if (!Number.isFinite(kg) || kg <= 0) {
+      Alert.alert("Entrée invalide", "Aucun poids valide reçu depuis le capteur de force.");
+      return;
+    }
+    const compostKg = Math.round(kg * COMPOST_RATIO * 100) / 100;
+    const now = new Date();
+    const maturesAt = addDays(now, MATURATION_DAYS);
+    const d = {
+      id: uid("dep"),
+      createdAt: now.toISOString(),
+      maturesAt: maturesAt.toISOString(),
+      wasteKg: kg,
+      compostKg,
+      note: note.trim(),
+      composterId: selectedComposter.id,
+      composterName: selectedComposter.name,
+    };
+
+    try {
+      await apiRequest(cardIp, "/api/deposit", {
+        method: "POST",
+        body: JSON.stringify({
+          composterId: selectedComposter.id,
+          wasteKg: kg,
+          note: note.trim(),
+          userId: currentUserId,
+        }),
+      });
+    } catch {
+      // conserve le dépôt local même si la carte ne répond pas
+    }
+
+    setDeposits((prev) => [d, ...prev]);
+    setVatStats((prev) => {
+      const next = { ...prev };
+      const compId = selectedComposter.id;
+      if (!next[compId]) next[compId] = {};
+      const fillVatIds = ["v1", "v2", "v3"];
+      let targetVatId = fillVatIds.find((vatId) => {
+        const vat = ensureVatStatsShape(next[compId]?.[vatId] || {});
+        return vat.fillPct < 100 || vat.weightKg <= 0;
+      }) || "v3";
+      const current = ensureVatStatsShape(next[compId]?.[targetVatId] || {});
+      const nextWeightKg = current.weightKg + kg;
+      next[compId][targetVatId] = ensureVatStatsShape({
+        ...current,
+        weightKg: nextWeightKg,
+        compostReadyKg: Math.max(current.compostReadyKg, nextWeightKg * DEFAULT_TRANSFER_RATIO),
+        fillPct: computeFillPctFromKg(nextWeightKg, targetVatId),
+        updatedAt: new Date().toISOString(),
+      });
+      return next;
+    });
+    relayOffDelayForDeposit();
+    setWasteKg("0");
+    setLiveWeightKg(0);
+    setWeightRaw(0);
+    setNote("");
+    setScreen("MAIN");
+    setActiveTab("DEPOTS");
+  }
+
+  function onDeleteDeposit(id) {
+    Alert.alert("Supprimer", "Supprimer ce dépôt ? (les points baisseront)", [
+      { text: "Annuler", style: "cancel" },
+      { text: "Supprimer", style: "destructive", onPress: () => setDeposits((p) => p.filter((x) => x.id !== id)) },
+    ]);
+  }
+
+  function onDeleteUser(userId) {
+    const uidToDelete = String(userId || "");
+    if (!uidToDelete) return;
+
+    const isCurrent = uidToDelete === currentUserId;
+    const usersCount = Object.keys(users || {}).length;
+
+    Alert.alert(
+      "Supprimer l’utilisateur",
+      usersCount <= 1
+        ? "Tu ne peux pas supprimer le dernier compte."
+        : "Supprimer ce compte ? Les points et l’historique associés seront supprimés.",
+      [
+        { text: "Annuler", style: "cancel" },
+        usersCount <= 1
+          ? { text: "OK", style: "default" }
+          : {
+              text: "Supprimer",
+              style: "destructive",
+              onPress: () => {
+                setUsers((prev) => {
+                  const next = { ...(prev || {}) };
+                  delete next[uidToDelete];
+                  return next;
+                });
+
+                if (isCurrent) {
+                  const remainingIds = Object.keys(users || {}).filter((id) => id !== uidToDelete);
+                  const nextId = remainingIds[0] || null;
+                  setCurrentUserId(nextId);
+
+                  const nextUser = nextId ? (users || {})[nextId] : null;
+                  setProfile({
+                    firstName: nextUser?.firstName || "",
+                    lastName: nextUser?.lastName || "",
+                    zip: nextUser?.zip || "",
+                  });
+                  setDeposits(Array.isArray(nextUser?.deposits) ? nextUser.deposits : []);
+                  setSpentPoints(Number(nextUser?.spentPoints) || 0);
+                }
+              },
+            },
+      ]
+    );
+  }
+
+
+  function onAddComposter() {
+    if (!isAdmin) {
+      Alert.alert("Accès refusé", "Mode admin requis.");
+      return;
+    }
+    const lat = Number(String(aLat).replace(",", "."));
+    const lon = Number(String(aLon).replace(",", "."));
+    if (!aName.trim() || !aAddress.trim() || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+      Alert.alert("Champs requis", "Nom, adresse, latitude et longitude sont obligatoires.");
+      return;
+    }
+    const c = {
+      id: uid("comp"),
+      name: aName.trim(),
+      address: aAddress.trim(),
+      latitude: lat,
+      longitude: lon,
+      accepts: ["Épluchures", "Marc de café"],
+      vats: [
+        { id: "v1", label: "Cuve 1", tempC: 30, mode: "REMPLISSAGE" },
+        { id: "v2", label: "Cuve 2", tempC: 30, mode: "REMPLISSAGE" },
+        { id: "v3", label: "Cuve 3", tempC: 30, mode: "REMPLISSAGE" },
+        { id: "v4", label: "Cuve 4 (stockage)", tempC: 24, mode: "STOCKAGE" },
+      ],
+    };
+    setComposters((prev) => [c, ...prev]);
+    setAName("");
+    setAAddress("");
+    setALat("");
+    setALon("");
+    setSelectedComposterId(c.id);
+    Alert.alert("✅ OK", "Composteur ajouté.");
+  }
+
+  function onDeleteComposter(composterId) {
+    Alert.alert("Supprimer", "Supprimer ce composteur ? (irréversible)", [
+      { text: "Annuler", style: "cancel" },
+      {
+        text: "Supprimer",
+        style: "destructive",
+        onPress: () => {
+          setComposters((prev) => prev.filter((c) => c.id !== composterId));
+          if (selectedComposterId === composterId) {
+            const next = composters.find((c) => c.id !== composterId)?.id ?? null;
+            setSelectedComposterId(next);
+          }
+        },
+      },
+    ]);
+  }
+
+  function redeemOffer(offer) {
+    if (totalPoints < offer.cost) {
+      Alert.alert("Points insuffisants", `Il te faut ${offer.cost} points pour ${offer.kg} kg.`);
+      return;
+    }
+    Alert.alert("Confirmer", `Retirer ${offer.kg} kg de compost contre ${offer.cost} points ?`, [
+      { text: "Annuler", style: "cancel" },
+      {
+        text: "Confirmer",
+        onPress: async () => {
+          try {
+            await apiRequest(cardIp, "/api/shop/redeem", {
+              method: "POST",
+           
+…
