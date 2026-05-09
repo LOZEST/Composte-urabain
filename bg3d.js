@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
-   GreenLoop — bg3d.js  (v5)
-   · Géométrie réelle Fusion (13 pièces)
-   · Couleurs gris-métal (clair, bien visible)
-   · Pièces clampées dans l'écran pendant l'explosion
-   · Spin individuel sur chaque pièce (rotation sur elle-même)
-   · Retour PROPRE à 0 quand on scroll en haut (pas de rotation résiduelle)
+   GreenLoop — bg3d.js  (v6 — couleurs Fusion réelles, gris acier)
+   · Couleurs "Acier – Satiné" extraites directement de Fusion
+   · Pas de vert sur les pièces — reflet blanc-froid uniquement
+   · Pièces restent dans l'écran (clamp)
+   · Spin individuel proportionnel à l'explosion
+   · RÉASSEMBLAGE PARFAIT : snap à (0,0,0) quand en haut
 ═══════════════════════════════════════════════════════════════ */
 
 (function () {
@@ -19,23 +19,25 @@
 
   waitThree(function () {
 
-    /* ── Couleurs gris-métal (lisibles sur fond sombre) ───────── */
-    function pickColor(y) {
+    /* ── Couleur gris acier par hauteur Y (comme Acier–Satiné Fusion) ── */
+    function steelGrey(y) {
+      // y ≈ -1.75 … +1.75 normalisé
       const t = Math.max(0, Math.min(1, (y + 1.75) / 3.5));
-      // gris-acier foncé → gris clair argenté
-      const dark  = { r: 0x55, g: 0x70, b: 0x68 };
-      const light = { r: 0xc2, g: 0xd4, b: 0xce };
-      const r = Math.round(dark.r + (light.r - dark.r) * t);
-      const g = Math.round(dark.g + (light.g - dark.g) * t);
-      const b = Math.round(dark.b + (light.b - dark.b) * t);
-      return (r << 16) | (g << 8) | b;
+      // acier foncé #6b6e6c → acier clair #c2c4c2 (palette purement grise)
+      const lo = { r: 0x6b, g: 0x6e, b: 0x6c };
+      const hi = { r: 0xc2, g: 0xc4, b: 0xc2 };
+      const R = Math.round(lo.r + (hi.r - lo.r) * t);
+      const G = Math.round(lo.g + (hi.g - lo.g) * t);
+      const B = Math.round(lo.b + (hi.b - lo.b) * t);
+      return (R << 16) | (G << 8) | B;
     }
 
-    /* ── Config ───────────────────────────────────────────────── */
-    const SPREAD       = 1.9;   // distance d'explosion max
-    const MAX_DISPLACE = 2.4;   // clamp : pièces restent dans l'écran
-    const POS_LERP     = 0.055;
-    const ROT_RETURN   = 0.18;  // retour rotation vers 0 (rapide)
+    /* ── Paramètres ───────────────────────────────────────────── */
+    const SPREAD       = 2.0;   // amplitude explosion
+    const MAX_DISPLACE = 2.5;   // clamp : tout reste dans l'écran
+    const POS_LERP     = 0.06;
+    const ROT_LERP     = 0.08;
+    const SNAP_THRESH  = 0.008; // en dessous → snap parfait à 0
 
     /* ── Renderer ─────────────────────────────────────────────── */
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -53,7 +55,7 @@
     cv.id = 'bg3d-canvas';
     document.body.insertBefore(cv, document.body.firstChild);
 
-    /* ── Scène / Caméra ───────────────────────────────────────── */
+    /* ── Scène ────────────────────────────────────────────────── */
     const scene  = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       44, window.innerWidth / window.innerHeight, 0.1, 200
@@ -61,17 +63,20 @@
     camera.position.set(0, 0.3, 7.0);
     camera.lookAt(0, 0, 0);
 
-    /* Éclairage naturel + accent vert froid */
-    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+    /* Éclairage : lumière studio neutre (pas de vert sur les pièces) */
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-    const k = new THREE.DirectionalLight(0xf0f8f4, 1.15);
-    k.position.set(4, 7, 5);  scene.add(k);
+    const keyL = new THREE.DirectionalLight(0xffffff, 1.10);
+    keyL.position.set(5, 8, 6);
+    scene.add(keyL);
 
-    const f = new THREE.DirectionalLight(0xc0dcd4, 0.40);
-    f.position.set(-5, -2, 4); scene.add(f);
+    const fillL = new THREE.DirectionalLight(0xdde8ff, 0.45); // léger bleu-froid
+    fillL.position.set(-4, -2, 5);
+    scene.add(fillL);
 
-    const r = new THREE.DirectionalLight(0x38d67a, 0.35);
-    r.position.set(1, -4, -4); scene.add(r);
+    const rimL = new THREE.DirectionalLight(0xffffff, 0.30);
+    rimL.position.set(0, -6, -5);
+    scene.add(rimL);
 
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -86,7 +91,7 @@
       targetExplode = window.scrollY / max;
     }, { passive: true });
 
-    /* ── Chargement mesh Fusion ───────────────────────────────── */
+    /* ── Chargement mesh ──────────────────────────────────────── */
     fetch('CAO/parts_mesh.json')
       .then(r => r.json())
       .then(buildScene)
@@ -103,24 +108,26 @@
 
         const [cx, cy, cz] = part.centroid;
 
+        /* Matériau acier satiné — gris pur, reflet blanc froid */
         const mat = new THREE.MeshPhongMaterial({
-          color:     pickColor(cy),
-          specular:  0x4de89a,   // reflet vert doux
-          shininess: 85,
+          color:     steelGrey(cy),
+          specular:  0xdddddd,    // reflet blanc-froid (acier)
+          shininess: 90,
           transparent: true,
-          opacity: 0.90,
+          opacity: 0.88,
           side: THREE.DoubleSide,
           depthWrite: false
         });
-
         const mesh = new THREE.Mesh(geo, mat);
         scene.add(mesh);
 
-        /* Arêtes lumineuses */
+        /* Arêtes grises fines (pas vertes) */
         try {
           mesh.add(new THREE.LineSegments(
-            new THREE.EdgesGeometry(geo, 26),
-            new THREE.LineBasicMaterial({ color: 0x38d67a, transparent: true, opacity: 0.22 })
+            new THREE.EdgesGeometry(geo, 28),
+            new THREE.LineBasicMaterial({
+              color: 0xaaaaaa, transparent: true, opacity: 0.15
+            })
           ));
         } catch(e) {}
 
@@ -129,20 +136,20 @@
         const dir = { x: cx/dl, y: cy/dl, z: cz/dl };
         const mag = 0.85 + Math.abs(cy)*0.38 + Math.sqrt(cx*cx+cz*cz)*0.18;
 
-        /* Spin individuel aléatoire par pièce */
+        /* Spin individuel aléatoire */
         const sv = {
-          x: (Math.random()-0.5)*0.012,
-          y: (Math.random()-0.5)*0.016,
+          x: (Math.random()-0.5)*0.011,
+          y: (Math.random()-0.5)*0.015,
           z: (Math.random()-0.5)*0.007
         };
 
-        /* Rotation accumulée (variable d'état par pièce) — CLAMPÉE à ±2π */
-        const rot = { x: 0, y: 0, z: 0 };
+        /* Rotation accumulée par pièce (clampée ±2π) */
+        const rot = { x:0, y:0, z:0 };
 
         objects.push({ mesh, dir, mag, sv, rot });
       });
 
-      setTimeout(() => { cv.style.opacity = '0.95'; }, 350);
+      setTimeout(() => { cv.style.opacity = '0.92'; }, 350);
 
       /* ── Boucle rendu ─────────────────────────────────────────── */
       function animate() {
@@ -150,63 +157,57 @@
 
         currentExplode += (targetExplode - currentExplode) * 0.038;
         const expl = Math.pow(currentExplode, 0.78);
-        const assembling = currentExplode < 0.03;
+
+        /* SNAP parfait : si on est tout en haut, tout à exactement zéro */
+        const snapping = currentExplode < SNAP_THRESH;
 
         for (const o of objects) {
           const { mesh, dir, mag, sv, rot } = o;
 
-          /* ── Position ── */
-          let tx = dir.x * expl * SPREAD * mag;
-          let ty = dir.y * expl * SPREAD * mag;
-          let tz = dir.z * expl * SPREAD * mag;
+          if (snapping) {
+            /* ─ Réassemblage PARFAIT ─ */
+            mesh.position.set(0, 0, 0);
+            mesh.rotation.set(0, 0, 0);
+            rot.x = 0; rot.y = 0; rot.z = 0;
+          } else {
+            /* ─ Position ─ */
+            let tx = dir.x * expl * SPREAD * mag;
+            let ty = dir.y * expl * SPREAD * mag;
+            let tz = dir.z * expl * SPREAD * mag;
+            const dl2 = Math.sqrt(tx*tx + ty*ty + tz*tz);
+            if (dl2 > MAX_DISPLACE) { const s=MAX_DISPLACE/dl2; tx*=s; ty*=s; tz*=s; }
+            mesh.position.x += (tx - mesh.position.x) * POS_LERP;
+            mesh.position.y += (ty - mesh.position.y) * POS_LERP;
+            mesh.position.z += (tz - mesh.position.z) * POS_LERP;
 
-          /* Clamp : les pièces ne quittent pas l'écran */
-          const dl = Math.sqrt(tx*tx + ty*ty + tz*tz);
-          if (dl > MAX_DISPLACE) { const s = MAX_DISPLACE/dl; tx*=s; ty*=s; tz*=s; }
-
-          mesh.position.x += (tx - mesh.position.x) * POS_LERP;
-          mesh.position.y += (ty - mesh.position.y) * POS_LERP;
-          mesh.position.z += (tz - mesh.position.z) * POS_LERP;
-
-          /* ── Rotation ──
-             Principe : rot.x/y/z s'accumule CLAMPÉE à ±TWO_PI.
-             La rotation affichée = rot * expl   → 0 automatiquement quand expl→0.
-             Aucune rotation résiduelle au sommet de la page. */
-          if (!assembling) {
+            /* ─ Rotation ─
+               Chaque pièce accumule son spin (clampé à ±2π).
+               Rotation affichée = accumulée × expl → revient à 0 naturellement. */
             rot.x = clamp(rot.x + sv.x * expl, -Math.PI*2, Math.PI*2);
             rot.y = clamp(rot.y + sv.y * expl, -Math.PI*2, Math.PI*2);
             rot.z = clamp(rot.z + sv.z * expl, -Math.PI*2, Math.PI*2);
-          } else {
-            /* Scroll tout en haut : reset rot.x/y/z vers 0 vite */
-            rot.x *= (1 - ROT_RETURN);
-            rot.y *= (1 - ROT_RETURN);
-            rot.z *= (1 - ROT_RETURN);
+
+            mesh.rotation.x += (rot.x * expl - mesh.rotation.x) * ROT_LERP;
+            mesh.rotation.y += (rot.y * expl - mesh.rotation.y) * ROT_LERP;
+            mesh.rotation.z += (rot.z * expl - mesh.rotation.z) * ROT_LERP;
           }
 
-          /* Rotation affichée proportionnelle à l'explosion */
-          const trx = rot.x * expl;
-          const try_ = rot.y * expl;
-          const trz = rot.z * expl;
-          mesh.rotation.x += (trx - mesh.rotation.x) * 0.07;
-          mesh.rotation.y += (try_ - mesh.rotation.y) * 0.07;
-          mesh.rotation.z += (trz - mesh.rotation.z) * 0.07;
-
-          /* ── Opacité ── */
-          const tOp = 0.90 - expl * 0.18;
+          /* Opacité */
+          const tOp = snapping ? 0.88 : 0.88 - expl * 0.18;
           mesh.material.opacity += (tOp - mesh.material.opacity) * 0.05;
           if (mesh.children[0])
-            mesh.children[0].material.opacity = tOp * 0.26;
+            mesh.children[0].material.opacity = tOp * 0.18;
         }
 
-        /* Rotation lente de la scène (s'arrête pendant l'explosion) */
-        scene.rotation.y += 0.00070 * (1 - currentExplode * 0.80);
+        /* Rotation lente de la scène entière (s'arrête quand explosion) */
+        scene.rotation.y += 0.00075 * (1 - currentExplode * 0.85);
 
         renderer.render(scene, camera);
       }
       animate();
     }
 
-    function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+    function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
   });
 })();
