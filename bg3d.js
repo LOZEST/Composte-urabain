@@ -142,13 +142,9 @@
         const [cx, cy, cz] = part.centroid;
         const col = siteColor(cy);
 
-        /* ── Matériau principal : gris acier opaque ── */
-        const mat = new THREE.MeshStandardMaterial({
+        /* ── Matériau principal : BasicMaterial = couleur uniforme, aucune face sombre ── */
+        const mat = new THREE.MeshBasicMaterial({
           color:     col,
-          emissive:  col,
-          emissiveIntensity: 0.45,
-          metalness: 0.90,
-          roughness: 0.58,
           transparent: false,
           opacity: 1.0,
           depthWrite: true,
@@ -235,9 +231,7 @@
             mesh.rotation.set(0, 0, 0);
             mesh.scale.setScalar(1.0);
             rot.x = rot.y = rot.z = 0;
-            mesh.material.opacity          = 1.0;
-            mesh.material.emissiveIntensity = 0.45;
-            mesh.material.depthWrite        = true;
+            mesh.material.depthWrite = true;
             // halo & arêtes quand assemblé
             if (mesh.children[0]) mesh.children[0].material.opacity = 0.10;
             if (mesh.children[1]) mesh.children[1].material.opacity = 0.12;
@@ -280,11 +274,8 @@
             mesh.scale.y  = mesh.scale.x;
             mesh.scale.z  = mesh.scale.x;
 
-            /* ── Opacité & émission ── */
-            const tOp = 1.0 - expl * 0.25;
-            mesh.material.opacity           += (tOp - mesh.material.opacity) * 0.05;
-            mesh.material.emissiveIntensity  += ((0.45 + expl * 0.10) - mesh.material.emissiveIntensity) * 0.05;
-            mesh.material.depthWrite          = mesh.material.opacity > 0.88;
+            /* ── Légère transparence à l'explosion ── */
+            mesh.material.depthWrite = true;
 
             if (mesh.children[0]) mesh.children[0].material.opacity = tOp * 0.14 + expl * 0.08;
             if (mesh.children[1]) mesh.children[1].material.opacity = 0.12 + expl * 0.08;
