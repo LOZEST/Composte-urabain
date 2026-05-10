@@ -147,8 +147,8 @@
           color:     col,
           emissive:  col,
           emissiveIntensity: 0.45,
-          metalness: 0.72,
-          roughness: 0.28,
+          metalness: 0.90,
+          roughness: 0.58,
           transparent: false,
           opacity: 1.0,
           depthWrite: true,
@@ -176,7 +176,7 @@
           const em  = new THREE.LineBasicMaterial({
             color: 0xd0dce8,
             transparent: true,
-            opacity: 0.12,
+            opacity: 0.80,
             blending: THREE.AdditiveBlending,
             depthWrite: false
           });
