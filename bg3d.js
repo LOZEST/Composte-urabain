@@ -142,7 +142,7 @@
         const [cx, cy, cz] = part.centroid;
         const col = siteColor(cy);
 
-        /* ── Matériau principal : gris acier ── */
+        /* ── Matériau principal : gris acier opaque ── */
         const mat = new THREE.MeshStandardMaterial({
           color:     col,
           emissive:  col,
@@ -152,7 +152,7 @@
           transparent: false,
           opacity: 1.0,
           depthWrite: true,
-          side: THREE.FrontSide
+          side: THREE.DoubleSide
         });
         const mesh = new THREE.Mesh(geo, mat);
         scene.add(mesh);
@@ -236,7 +236,7 @@
             mesh.scale.setScalar(1.0);
             rot.x = rot.y = rot.z = 0;
             mesh.material.opacity          = 1.0;
-            mesh.material.emissiveIntensity = 0.08;
+            mesh.material.emissiveIntensity = 0.12;
             mesh.material.depthWrite        = true;
             // halo & arêtes quand assemblé
             if (mesh.children[0]) mesh.children[0].material.opacity = 0.10;
