@@ -86,7 +86,7 @@
     camera.lookAt(0, 0.1, 0);
 
     /* ── Éclairage dramatique vert ── */
-    scene.add(new THREE.AmbientLight(0x07130f, 0.9));           // fond sombre du site
+    scene.add(new THREE.AmbientLight(0xffffff, 1.4));            // lumière ambiante blanche
 
     const key = new THREE.DirectionalLight(0xffffff, 1.60);     // lumière clé blanche
     key.position.set(-3, 8, 5);
@@ -152,7 +152,7 @@
           transparent: true,
           opacity: 1.0,
           depthWrite: true,
-          side: THREE.FrontSide
+          side: THREE.DoubleSide
         });
         const mesh = new THREE.Mesh(geo, mat);
         scene.add(mesh);
