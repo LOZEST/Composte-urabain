@@ -28,36 +28,6 @@ window.addEventListener('load', () => {
   }, 700);
 });
 
-/* ── Custom Cursor ──────────────────────────────────────────────── */
-(function() {
-  if (window.matchMedia('(hover: none)').matches) return;
-
-  const ring = document.createElement('div');
-  ring.id = 'gl-cursor';
-  const dot = document.createElement('div');
-  dot.id = 'gl-cursor-dot';
-  document.body.appendChild(ring);
-  document.body.appendChild(dot);
-
-  let mx = -300, my = -300, rx = -300, ry = -300;
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    dot.style.cssText = `transform:translate3d(${mx - 3}px,${my - 3}px,0)`;
-  });
-
-  (function follow() {
-    rx += (mx - rx) * 0.11;
-    ry += (my - ry) * 0.11;
-    ring.style.cssText = `transform:translate3d(${rx - 18}px,${ry - 18}px,0)`;
-    requestAnimationFrame(follow);
-  })();
-
-  document.querySelectorAll('a,button,.card,.logo-card,.btn').forEach(el => {
-    el.addEventListener('mouseenter', () => ring.classList.add('cursor-hover'));
-    el.addEventListener('mouseleave', () => ring.classList.remove('cursor-hover'));
-  });
-})();
 
 /* ── Scroll Reveal ──────────────────────────────────────────────── */
 (function() {
