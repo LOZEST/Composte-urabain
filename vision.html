@@ -18,9 +18,8 @@
   </div>
 
   <div class="page">
-    <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
-    <div class="orb orb-1" aria-hidden="true"></div>
-    <div class="orb orb-2" aria-hidden="true"></div>
+    <video class="vision-bg-video" src="assets/vision-greenloop.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
+    <div class="vision-bg-overlay" aria-hidden="true"></div>
     
 <header class="header">
   <div class="nav">
@@ -66,27 +65,6 @@
         <div style="font-size:4rem;font-weight:900;color:var(--green);letter-spacing:-.04em;">150<span style="font-size:2rem;">kg</span></div>
         <p style="margin-top:12px;font-size:1.05rem;">à 200 kg de biodéchets produits par foyer et par an.</p>
       </article>
-    </div>
-  </section>
-
-  <!-- Vidéo immersive -->
-  <section class="block">
-    <div class="video-section">
-      <div class="video-kicker">
-        <div class="kicker">Le projet en images</div>
-        <h2>GreenLoop en action.</h2>
-        <p>Une vision concrète de ce que GreenLoop apporte à la ville de demain.</p>
-      </div>
-      <div class="video-wrap">
-        <video
-          src="assets/vision-greenloop.mp4"
-          autoplay
-          muted
-          loop
-          playsinline
-          poster=""
-        ></video>
-      </div>
     </div>
   </section>
 
@@ -232,8 +210,6 @@
 </footer>
 
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="bg3d.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
