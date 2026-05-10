@@ -580,7 +580,8 @@ body.vision-page .page-hero p{
 }
 .loader-brand img {
   width: 74px; height: 74px;
-  border-radius: 22px; object-fit: cover;
+  border-radius: 50%; object-fit: contain;
+  background: #f0ede6;
   box-shadow: 0 0 40px rgba(56,214,122,.3);
 }
 .loader-name {
