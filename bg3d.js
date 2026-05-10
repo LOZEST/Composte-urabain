@@ -146,7 +146,7 @@
         const mat = new THREE.MeshStandardMaterial({
           color:     col,
           emissive:  col,
-          emissiveIntensity: 0.12,
+          emissiveIntensity: 0.45,
           metalness: 0.72,
           roughness: 0.28,
           transparent: false,
@@ -170,13 +170,13 @@
         glowMesh.scale.setScalar(1.04);
         mesh.add(glowMesh);
 
-        /* ── Arêtes acier claires ── */
+        /* ── Arêtes acier discrètes ── */
         try {
           const eg  = new THREE.EdgesGeometry(geo, 22);
           const em  = new THREE.LineBasicMaterial({
             color: 0xd0dce8,
             transparent: true,
-            opacity: 0.55,
+            opacity: 0.12,
             blending: THREE.AdditiveBlending,
             depthWrite: false
           });
@@ -236,11 +236,11 @@
             mesh.scale.setScalar(1.0);
             rot.x = rot.y = rot.z = 0;
             mesh.material.opacity          = 1.0;
-            mesh.material.emissiveIntensity = 0.12;
+            mesh.material.emissiveIntensity = 0.45;
             mesh.material.depthWrite        = true;
             // halo & arêtes quand assemblé
             if (mesh.children[0]) mesh.children[0].material.opacity = 0.10;
-            if (mesh.children[1]) mesh.children[1].material.opacity = 0.55;
+            if (mesh.children[1]) mesh.children[1].material.opacity = 0.12;
 
           } else {
             /* ── POSITION avec tourbillon ──
@@ -283,11 +283,11 @@
             /* ── Opacité & émission ── */
             const tOp = 1.0 - expl * 0.25;
             mesh.material.opacity           += (tOp - mesh.material.opacity) * 0.05;
-            mesh.material.emissiveIntensity  += ((0.12 + expl * 0.10) - mesh.material.emissiveIntensity) * 0.05;
+            mesh.material.emissiveIntensity  += ((0.45 + expl * 0.10) - mesh.material.emissiveIntensity) * 0.05;
             mesh.material.depthWrite          = mesh.material.opacity > 0.88;
 
             if (mesh.children[0]) mesh.children[0].material.opacity = tOp * 0.14 + expl * 0.08;
-            if (mesh.children[1]) mesh.children[1].material.opacity = 0.55 + expl * 0.15;
+            if (mesh.children[1]) mesh.children[1].material.opacity = 0.12 + expl * 0.08;
           }
         }
 
