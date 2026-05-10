@@ -25,14 +25,14 @@
     // y normalisé ≈ -1.75 (bas) … +1.75 (haut)
     function siteColor (y) {
       const t = Math.max(0, Math.min(1, (y + 1.75) / 3.5));
-      // bas : #0d2a1d  →  haut : #38d67a
+      // bas : #1a1c22  →  haut : #a0b0c2  (gris acier)
       const palette = [
-        [0x0d, 0x2a, 0x1d],
-        [0x12, 0x37, 0x26],
-        [0x1d, 0x5d, 0x40],
-        [0x26, 0x7a, 0x54],
-        [0x2e, 0xa3, 0x66],
-        [0x38, 0xd6, 0x7a]
+        [0x1a, 0x1c, 0x22],
+        [0x28, 0x2c, 0x36],
+        [0x3c, 0x42, 0x52],
+        [0x56, 0x60, 0x74],
+        [0x78, 0x86, 0x9a],
+        [0xa0, 0xb0, 0xc2]
       ];
       const fi = t * (palette.length - 1);
       const i  = Math.min(Math.floor(fi), palette.length - 2);
@@ -142,14 +142,14 @@
         const [cx, cy, cz] = part.centroid;
         const col = siteColor(cy);
 
-        /* ── Matériau principal : vert organique, légèrement émissif ── */
+        /* ── Matériau principal : gris acier ── */
         const mat = new THREE.MeshStandardMaterial({
           color:     col,
           emissive:  col,
-          emissiveIntensity: 0.08,   // légère auto-luminescence
-          metalness: 0.18,
-          roughness: 0.55,
-          transparent: true,
+          emissiveIntensity: 0.12,
+          metalness: 0.72,
+          roughness: 0.28,
+          transparent: false,
           opacity: 1.0,
           depthWrite: true,
           side: THREE.FrontSide
@@ -157,11 +157,11 @@
         const mesh = new THREE.Mesh(geo, mat);
         scene.add(mesh);
 
-        /* ── Halo de lueur verte (BackSide additive, légèrement plus grand) ── */
+        /* ── Halo acier (BackSide additive, légèrement plus grand) ── */
         const glowMat = new THREE.MeshBasicMaterial({
-          color: 0x38d67a,
+          color: 0xc0d0e0,
           transparent: true,
-          opacity: 0.06,
+          opacity: 0.10,
           side: THREE.BackSide,
           blending: THREE.AdditiveBlending,
           depthWrite: false
@@ -170,13 +170,13 @@
         glowMesh.scale.setScalar(1.04);
         mesh.add(glowMesh);
 
-        /* ── Arêtes lumineuses vertes ── */
+        /* ── Arêtes acier claires ── */
         try {
           const eg  = new THREE.EdgesGeometry(geo, 22);
           const em  = new THREE.LineBasicMaterial({
-            color: 0x38d67a,
+            color: 0xd0dce8,
             transparent: true,
-            opacity: 0.28,
+            opacity: 0.55,
             blending: THREE.AdditiveBlending,
             depthWrite: false
           });
@@ -239,8 +239,8 @@
             mesh.material.emissiveIntensity = 0.08;
             mesh.material.depthWrite        = true;
             // halo & arêtes quand assemblé
-            if (mesh.children[0]) mesh.children[0].material.opacity = 0.06;
-            if (mesh.children[1]) mesh.children[1].material.opacity = 0.28;
+            if (mesh.children[0]) mesh.children[0].material.opacity = 0.10;
+            if (mesh.children[1]) mesh.children[1].material.opacity = 0.55;
 
           } else {
             /* ── POSITION avec tourbillon ──
@@ -283,11 +283,11 @@
             /* ── Opacité & émission ── */
             const tOp = 1.0 - expl * 0.25;
             mesh.material.opacity           += (tOp - mesh.material.opacity) * 0.05;
-            mesh.material.emissiveIntensity  += ((0.08 + expl * 0.14) - mesh.material.emissiveIntensity) * 0.05;
-            mesh.material.depthWrite          = mesh.material.opacity > 0.92;
+            mesh.material.emissiveIntensity  += ((0.12 + expl * 0.10) - mesh.material.emissiveIntensity) * 0.05;
+            mesh.material.depthWrite          = mesh.material.opacity > 0.88;
 
-            if (mesh.children[0]) mesh.children[0].material.opacity = tOp * 0.12 + expl * 0.10;
-            if (mesh.children[1]) mesh.children[1].material.opacity = 0.28 + expl * 0.18;
+            if (mesh.children[0]) mesh.children[0].material.opacity = tOp * 0.14 + expl * 0.08;
+            if (mesh.children[1]) mesh.children[1].material.opacity = 0.55 + expl * 0.15;
           }
         }
 
