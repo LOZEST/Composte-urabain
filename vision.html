@@ -7,7 +7,7 @@
   <link rel="icon" href="Logo green loop.JPG" type="image/jpeg">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="vision-page">
 
   <div id="gl-loader">
     <div class="loader-brand">
@@ -216,19 +216,25 @@
       const video = document.getElementById('vision-video');
       const skip  = document.getElementById('vision-skip');
 
-      // Scroll bloqué pendant la vidéo
+      function preventScroll(e) { e.preventDefault(); }
+
+      // Bloquer le scroll
+      document.documentElement.classList.add('video-playing');
       document.body.classList.add('video-playing');
+      window.addEventListener('wheel',      preventScroll, { passive: false });
+      window.addEventListener('touchmove',  preventScroll, { passive: false });
 
       function unlock() {
+        document.documentElement.classList.remove('video-playing');
         document.body.classList.remove('video-playing');
+        window.removeEventListener('wheel',     preventScroll);
+        window.removeEventListener('touchmove', preventScroll);
         video.classList.add('faded');
         skip.classList.add('hidden');
       }
 
-      // Fin naturelle → débloque
       video.addEventListener('ended', unlock);
 
-      // Bouton "Passer" → débloque immédiatement
       skip.addEventListener('click', function () {
         video.pause();
         unlock();

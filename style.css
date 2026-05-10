@@ -284,8 +284,17 @@ section.block{
   pointer-events:none;
   transform:translateX(-50%) translateY(16px);
 }
-body.video-playing{
+body.video-playing,
+html.video-playing{
   overflow:hidden;
+}
+body.vision-page .page-hero h1,
+body.vision-page h2{
+  color:#ffffff;
+  text-shadow:0 2px 18px rgba(0,0,0,.55);
+}
+body.vision-page .page-hero p{
+  color:#ddeedd;
 }
 .section-head{
   width:var(--container);margin:0 auto 24px;
