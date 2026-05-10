@@ -18,8 +18,8 @@
   </div>
 
   <div class="page">
-    <video class="vision-bg-video" src="assets/vision-greenloop.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
-    <div class="vision-bg-overlay" aria-hidden="true"></div>
+    <video id="vision-video" class="vision-bg-video" src="assets/vision-greenloop.mp4" autoplay muted playsinline aria-hidden="true"></video>
+    <button id="vision-skip" class="vision-skip" aria-label="Passer l'intro">Passer ↓</button>
     
 <header class="header">
   <div class="nav">
@@ -211,5 +211,29 @@
 
   </div>
   <script src="script.js"></script>
+  <script>
+    (function () {
+      const video = document.getElementById('vision-video');
+      const skip  = document.getElementById('vision-skip');
+
+      // Scroll bloqué pendant la vidéo
+      document.body.classList.add('video-playing');
+
+      function unlock() {
+        document.body.classList.remove('video-playing');
+        video.classList.add('faded');
+        skip.classList.add('hidden');
+      }
+
+      // Fin naturelle → débloque
+      video.addEventListener('ended', unlock);
+
+      // Bouton "Passer" → débloque immédiatement
+      skip.addEventListener('click', function () {
+        video.pause();
+        unlock();
+      });
+    })();
+  </script>
 </body>
 </html>
