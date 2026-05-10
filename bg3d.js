@@ -25,14 +25,14 @@
     // y normalisé ≈ -1.75 (bas) … +1.75 (haut)
     function siteColor (y) {
       const t = Math.max(0, Math.min(1, (y + 1.75) / 3.5));
-      // bas : #1a1c22  →  haut : #a0b0c2  (gris acier)
+      // bas : #5a6070  →  haut : #d0dce8  (gris acier visible)
       const palette = [
-        [0x1a, 0x1c, 0x22],
-        [0x28, 0x2c, 0x36],
-        [0x3c, 0x42, 0x52],
-        [0x56, 0x60, 0x74],
-        [0x78, 0x86, 0x9a],
-        [0xa0, 0xb0, 0xc2]
+        [0x5a, 0x60, 0x70],
+        [0x6a, 0x74, 0x86],
+        [0x80, 0x8e, 0xa0],
+        [0x96, 0xa6, 0xb8],
+        [0xb0, 0xc0, 0xd0],
+        [0xd0, 0xdc, 0xe8]
       ];
       const fi = t * (palette.length - 1);
       const i  = Math.min(Math.floor(fi), palette.length - 2);
@@ -86,7 +86,7 @@
     camera.lookAt(0, 0.1, 0);
 
     /* ── Éclairage dramatique vert ── */
-    scene.add(new THREE.AmbientLight(0x07130f, 0.9));           // fond sombre du site
+    scene.add(new THREE.AmbientLight(0xffffff, 1.8));            // lumière ambiante uniforme
 
     const key = new THREE.DirectionalLight(0xffffff, 1.60);     // lumière clé blanche
     key.position.set(-3, 8, 5);
