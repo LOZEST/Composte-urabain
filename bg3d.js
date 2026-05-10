@@ -25,14 +25,14 @@
     // y normalisé ≈ -1.75 (bas) … +1.75 (haut)
     function siteColor (y) {
       const t = Math.max(0, Math.min(1, (y + 1.75) / 3.5));
-      // bas : #5a6070  →  haut : #d0dce8  (gris acier visible)
+      // bas : #0d2a1d  →  haut : #38d67a
       const palette = [
-        [0x5a, 0x60, 0x70],
-        [0x6a, 0x74, 0x86],
-        [0x80, 0x8e, 0xa0],
-        [0x96, 0xa6, 0xb8],
-        [0xb0, 0xc0, 0xd0],
-        [0xd0, 0xdc, 0xe8]
+        [0x0d, 0x2a, 0x1d],
+        [0x12, 0x37, 0x26],
+        [0x1d, 0x5d, 0x40],
+        [0x26, 0x7a, 0x54],
+        [0x2e, 0xa3, 0x66],
+        [0x38, 0xd6, 0x7a]
       ];
       const fi = t * (palette.length - 1);
       const i  = Math.min(Math.floor(fi), palette.length - 2);
@@ -86,7 +86,7 @@
     camera.lookAt(0, 0.1, 0);
 
     /* ── Éclairage dramatique vert ── */
-    scene.add(new THREE.AmbientLight(0xffffff, 1.8));            // lumière ambiante uniforme
+    scene.add(new THREE.AmbientLight(0x07130f, 0.9));           // fond sombre du site
 
     const key = new THREE.DirectionalLight(0xffffff, 1.60);     // lumière clé blanche
     key.position.set(-3, 8, 5);
@@ -142,22 +142,26 @@
         const [cx, cy, cz] = part.centroid;
         const col = siteColor(cy);
 
-        /* ── Matériau principal : BasicMaterial = couleur uniforme, aucune face sombre ── */
-        const mat = new THREE.MeshBasicMaterial({
+        /* ── Matériau principal : vert organique, légèrement émissif ── */
+        const mat = new THREE.MeshStandardMaterial({
           color:     col,
-          transparent: false,
+          emissive:  col,
+          emissiveIntensity: 0.08,   // légère auto-luminescence
+          metalness: 0.18,
+          roughness: 0.55,
+          transparent: true,
           opacity: 1.0,
           depthWrite: true,
-          side: THREE.DoubleSide
+          side: THREE.FrontSide
         });
         const mesh = new THREE.Mesh(geo, mat);
         scene.add(mesh);
 
-        /* ── Halo acier (BackSide additive, légèrement plus grand) ── */
+        /* ── Halo de lueur verte (BackSide additive, légèrement plus grand) ── */
         const glowMat = new THREE.MeshBasicMaterial({
-          color: 0xc0d0e0,
+          color: 0x38d67a,
           transparent: true,
-          opacity: 0.10,
+          opacity: 0.06,
           side: THREE.BackSide,
           blending: THREE.AdditiveBlending,
           depthWrite: false
@@ -166,13 +170,13 @@
         glowMesh.scale.setScalar(1.04);
         mesh.add(glowMesh);
 
-        /* ── Arêtes acier discrètes ── */
+        /* ── Arêtes lumineuses vertes ── */
         try {
           const eg  = new THREE.EdgesGeometry(geo, 22);
           const em  = new THREE.LineBasicMaterial({
-            color: 0xd0dce8,
+            color: 0x38d67a,
             transparent: true,
-            opacity: 0.80,
+            opacity: 0.28,
             blending: THREE.AdditiveBlending,
             depthWrite: false
           });
@@ -231,10 +235,12 @@
             mesh.rotation.set(0, 0, 0);
             mesh.scale.setScalar(1.0);
             rot.x = rot.y = rot.z = 0;
-            mesh.material.depthWrite = true;
+            mesh.material.opacity          = 1.0;
+            mesh.material.emissiveIntensity = 0.08;
+            mesh.material.depthWrite        = true;
             // halo & arêtes quand assemblé
-            if (mesh.children[0]) mesh.children[0].material.opacity = 0.10;
-            if (mesh.children[1]) mesh.children[1].material.opacity = 0.12;
+            if (mesh.children[0]) mesh.children[0].material.opacity = 0.06;
+            if (mesh.children[1]) mesh.children[1].material.opacity = 0.28;
 
           } else {
             /* ── POSITION avec tourbillon ──
@@ -274,11 +280,14 @@
             mesh.scale.y  = mesh.scale.x;
             mesh.scale.z  = mesh.scale.x;
 
-            /* ── Légère transparence à l'explosion ── */
-            mesh.material.depthWrite = true;
+            /* ── Opacité & émission ── */
+            const tOp = 1.0 - expl * 0.25;
+            mesh.material.opacity           += (tOp - mesh.material.opacity) * 0.05;
+            mesh.material.emissiveIntensity  += ((0.08 + expl * 0.14) - mesh.material.emissiveIntensity) * 0.05;
+            mesh.material.depthWrite          = mesh.material.opacity > 0.92;
 
-            if (mesh.children[0]) mesh.children[0].material.opacity = tOp * 0.14 + expl * 0.08;
-            if (mesh.children[1]) mesh.children[1].material.opacity = 0.12 + expl * 0.08;
+            if (mesh.children[0]) mesh.children[0].material.opacity = tOp * 0.12 + expl * 0.10;
+            if (mesh.children[1]) mesh.children[1].material.opacity = 0.28 + expl * 0.18;
           }
         }
 
