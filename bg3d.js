@@ -1,91 +1,108 @@
-/* ═══════════════════════════════════════════════════════════════
-   GreenLoop — bg3d.js  (v7 — rendu premium product showcase)
-   Style : grande modélisation 3D acier, éclairage studio, scroll = explosion
-   · MeshStandardMaterial PBR (metalness/roughness) — acier vrai
-   · depthWrite correct → pièces solides, pas de transparence parasite
-   · Assemblé = opaque parfait, dépecé = légère transparence
-   · Rotation lente sur Y en assemblé, spin individuel en explosé
-   · Snap parfait position + rotation à (0,0,0) au top de la page
-═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+   GreenLoop — bg3d.js  (v8 — FINAL)
+
+   Modélisation Fusion 360 réelle, 13 pièces du composteur autonome.
+   Couleurs site : #07130f → #1d5d40 → #38d67a
+   Scroll bas  → explosion en tourbillon, pièces restent à l'écran
+   Scroll haut → réassemblage PARFAIT (snap)
+   Rotation lente en assemblé, éclairage dramatique vert
+═══════════════════════════════════════════════════════════════════ */
 
 (function () {
   'use strict';
 
-  function waitThree (cb) {
-    if (typeof THREE !== 'undefined') { cb(); return; }
-    const id = setInterval(() => {
-      if (typeof THREE !== 'undefined') { clearInterval(id); cb(); }
-    }, 80);
+  /* ── Attente Three.js ─────────────────────────────────────────────── */
+  function ready (cb) {
+    if (typeof THREE !== 'undefined') return cb();
+    const t = setInterval(() => { if (typeof THREE !== 'undefined') { clearInterval(t); cb(); } }, 60);
   }
 
-  waitThree(function () {
+  ready(function () {
 
-    /* ═══════════════════════════════════════════════════════════
-       PARAMÈTRES
-    ═══════════════════════════════════════════════════════════ */
-    const SPREAD        = 2.2;    // amplitude explosion
-    const MAX_DISPLACE  = 2.8;    // clamp : rien ne sort de l'écran
-    const POS_LERP      = 0.055;
-    const ROT_LERP      = 0.07;
-    const SNAP_THRESH   = 0.006;  // snap parfait en dessous de cette valeur
+    /* ════════════════════════════════════════════════════════════════
+       COULEURS — palette exacte du site GreenLoop
+    ════════════════════════════════════════════════════════════════ */
+    // y normalisé ≈ -1.75 (bas) … +1.75 (haut)
+    function siteColor (y) {
+      const t = Math.max(0, Math.min(1, (y + 1.75) / 3.5));
+      // bas : #0d2a1d  →  haut : #38d67a
+      const palette = [
+        [0x0d, 0x2a, 0x1d],
+        [0x12, 0x37, 0x26],
+        [0x1d, 0x5d, 0x40],
+        [0x26, 0x7a, 0x54],
+        [0x2e, 0xa3, 0x66],
+        [0x38, 0xd6, 0x7a]
+      ];
+      const fi = t * (palette.length - 1);
+      const i  = Math.min(Math.floor(fi), palette.length - 2);
+      const f  = fi - i;
+      const lo = palette[i], hi = palette[i + 1];
+      const R  = Math.round(lo[0] + (hi[0] - lo[0]) * f);
+      const G  = Math.round(lo[1] + (hi[1] - lo[1]) * f);
+      const B  = Math.round(lo[2] + (hi[2] - lo[2]) * f);
+      return (R << 16) | (G << 8) | B;
+    }
 
-    /* ═══════════════════════════════════════════════════════════
+    /* ════════════════════════════════════════════════════════════════
+       PARAMÈTRES ANIMATION
+    ════════════════════════════════════════════════════════════════ */
+    const SPREAD       = 2.4;     // amplitude explosion
+    const SWIRL        = 1.6;     // amplitude tourbillon latéral
+    const MAX_DISP     = 2.8;     // clamp : pièces restent à l'écran
+    const POS_LERP     = 0.052;
+    const ROT_LERP     = 0.065;
+    const SNAP         = 0.005;   // seuil snap parfait
+
+    /* ════════════════════════════════════════════════════════════════
        RENDERER
-    ═══════════════════════════════════════════════════════════ */
+    ════════════════════════════════════════════════════════════════ */
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0);
-    renderer.shadowMap.enabled = false;
-    // tone mapping pour look cinématique
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMapping      = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
 
     const cv = renderer.domElement;
     Object.assign(cv.style, {
       position: 'fixed', top: 0, left: 0,
       width: '100%', height: '100%',
       pointerEvents: 'none', zIndex: '0',
-      opacity: '0', transition: 'opacity 2.2s ease'
+      opacity: '0', transition: 'opacity 2.4s ease'
     });
     cv.id = 'bg3d-canvas';
     document.body.insertBefore(cv, document.body.firstChild);
 
-    /* ═══════════════════════════════════════════════════════════
+    /* ════════════════════════════════════════════════════════════════
        SCÈNE & CAMÉRA
-    ═══════════════════════════════════════════════════════════ */
+    ════════════════════════════════════════════════════════════════ */
     const scene  = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      42, window.innerWidth / window.innerHeight, 0.01, 200
+      44, window.innerWidth / window.innerHeight, 0.01, 300
     );
-    // caméra proche : modèle grand et présent
-    camera.position.set(0.6, 0.4, 6.2);
-    camera.lookAt(0, 0, 0);
+    // Vue légèrement en dessous-côté pour un rendu 3D riche
+    camera.position.set(0.8, 0.5, 6.0);
+    camera.lookAt(0, 0.1, 0);
 
-    /* ─── Éclairage studio acier ─── */
+    /* ── Éclairage dramatique vert ── */
+    scene.add(new THREE.AmbientLight(0x07130f, 0.9));           // fond sombre du site
 
-    // Ambiance froide légère
-    scene.add(new THREE.AmbientLight(0xd0e4f0, 0.40));
+    const key = new THREE.DirectionalLight(0xffffff, 1.60);     // lumière clé blanche
+    key.position.set(-3, 8, 5);
+    scene.add(key);
 
-    // Lumière clé — forte, légèrement chaude, venant du dessus-gauche
-    const keyL = new THREE.DirectionalLight(0xfff4e8, 1.80);
-    keyL.position.set(-4, 8, 5);
-    scene.add(keyL);
+    const green = new THREE.DirectionalLight(0x38d67a, 1.20);   // accent vert caractéristique
+    green.position.set(4, -2, -4);
+    scene.add(green);
 
-    // Lumière de remplissage — froide, droite
-    const fillL = new THREE.DirectionalLight(0xc8dcff, 0.55);
-    fillL.position.set(6, 2, 3);
-    scene.add(fillL);
+    const fill = new THREE.DirectionalLight(0x8cffbe, 0.45);    // fill vert clair
+    fill.position.set(-5, 3, 2);
+    scene.add(fill);
 
-    // Rimlight — contour blanc, derrière
-    const rimL = new THREE.DirectionalLight(0xffffff, 0.70);
-    rimL.position.set(0, -3, -6);
-    scene.add(rimL);
-
-    // Accent bas chaud (sol réfléchi)
-    const groundL = new THREE.DirectionalLight(0xffe8c0, 0.25);
-    groundL.position.set(0, -8, 2);
-    scene.add(groundL);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.55);     // contour blanc
+    rim.position.set(1, -5, -5);
+    scene.add(rim);
 
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -93,131 +110,162 @@
       camera.updateProjectionMatrix();
     });
 
-    /* ═══════════════════════════════════════════════════════════
-       SCROLL → valeur explosion 0..1
-    ═══════════════════════════════════════════════════════════ */
-    let targetExplode = 0, currentExplode = 0;
+    /* ════════════════════════════════════════════════════════════════
+       SCROLL
+    ════════════════════════════════════════════════════════════════ */
+    let tgt = 0, cur = 0;
     window.addEventListener('scroll', () => {
-      const max = Math.max(document.body.scrollHeight - window.innerHeight, 1);
-      targetExplode = window.scrollY / max;
+      tgt = window.scrollY / Math.max(document.body.scrollHeight - window.innerHeight, 1);
     }, { passive: true });
 
-    /* ═══════════════════════════════════════════════════════════
+    /* ════════════════════════════════════════════════════════════════
        CHARGEMENT MESH FUSION
-    ═══════════════════════════════════════════════════════════ */
+    ════════════════════════════════════════════════════════════════ */
     fetch('CAO/parts_mesh.json')
       .then(r => r.json())
-      .then(buildScene)
-      .catch(e => console.warn('bg3d: mesh load failed', e));
+      .then(build)
+      .catch(e => console.warn('[bg3d] Mesh load failed:', e));
 
-    /* ─── Couleur acier par hauteur : gris moyen variant du foncé au clair ─── */
-    function steelColor (y) {
-      const t = Math.max(0, Math.min(1, (y + 1.75) / 3.5));
-      // #787c7a (bas, acier foncé) → #d2d6d4 (haut, acier poli clair)
-      const lo = { r: 0x78, g: 0x7c, b: 0x7a };
-      const hi = { r: 0xd2, g: 0xd6, b: 0xd4 };
-      const R = Math.round(lo.r + (hi.r - lo.r) * t);
-      const G = Math.round(lo.g + (hi.g - lo.g) * t);
-      const B = Math.round(lo.b + (hi.b - lo.b) * t);
-      return (R << 16) | (G << 8) | B;
-    }
+    /* ════════════════════════════════════════════════════════════════
+       CONSTRUCTION DE LA SCÈNE
+    ════════════════════════════════════════════════════════════════ */
+    function build (parts) {
+      const objs = [];
 
-    function buildScene (parts) {
-      const objects = [];
-
-      parts.forEach(part => {
-        /* Géométrie réelle Fusion */
+      parts.forEach((part, idx) => {
+        /* Géométrie */
         const geo = new THREE.BufferGeometry();
         geo.setAttribute('position',
           new THREE.BufferAttribute(new Float32Array(part.verts), 3));
         geo.computeVertexNormals();
 
         const [cx, cy, cz] = part.centroid;
+        const col = siteColor(cy);
 
-        /* ── Matériau PBR acier satiné (MeshStandardMaterial) ── */
+        /* ── Matériau principal : vert organique, légèrement émissif ── */
         const mat = new THREE.MeshStandardMaterial({
-          color:      steelColor(cy),
-          metalness:  0.72,    // aspect métallique prononcé
-          roughness:  0.38,    // poli satiné (pas miroir, pas mat)
-          envMapIntensity: 1.0,
-          // transparent géré dynamiquement
+          color:     col,
+          emissive:  col,
+          emissiveIntensity: 0.08,   // légère auto-luminescence
+          metalness: 0.18,
+          roughness: 0.55,
           transparent: true,
           opacity: 1.0,
-          depthWrite: true,    // ← CRUCIAL : pièces solides, pas de transparence parasite
+          depthWrite: true,
           side: THREE.FrontSide
         });
-
         const mesh = new THREE.Mesh(geo, mat);
         scene.add(mesh);
 
-        /* Arêtes très fines, gris clair — donnent la définition industrielle */
+        /* ── Halo de lueur verte (BackSide additive, légèrement plus grand) ── */
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: 0x38d67a,
+          transparent: true,
+          opacity: 0.06,
+          side: THREE.BackSide,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const glowMesh = new THREE.Mesh(geo, glowMat);
+        glowMesh.scale.setScalar(1.04);
+        mesh.add(glowMesh);
+
+        /* ── Arêtes lumineuses vertes ── */
         try {
-          const eg = new THREE.EdgesGeometry(geo, 25);
-          const em = new THREE.LineBasicMaterial({
-            color: 0xe8eceb, transparent: true, opacity: 0.12
+          const eg  = new THREE.EdgesGeometry(geo, 22);
+          const em  = new THREE.LineBasicMaterial({
+            color: 0x38d67a,
+            transparent: true,
+            opacity: 0.28,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
           });
           mesh.add(new THREE.LineSegments(eg, em));
-        } catch(e) {}
+        } catch (_) {}
 
-        /* Direction d'explosion */
-        const dl = Math.sqrt(cx*cx + cy*cy + cz*cz) || 1;
+        /* ── Direction d'explosion ── */
+        const dl  = Math.sqrt(cx*cx + cy*cy + cz*cz) || 1;
         const dir = { x: cx/dl, y: cy/dl, z: cz/dl };
-        const mag = 0.85 + Math.abs(cy)*0.35 + Math.sqrt(cx*cx + cz*cz)*0.15;
+        const mag = 0.90 + Math.abs(cy)*0.38 + Math.sqrt(cx*cx+cz*cz)*0.18;
 
-        /* Vitesse de spin individuelle (aléatoire, faible) */
+        /* ── Vecteur tourbillon (perpendiculaire à dir dans XZ) ──
+           Chaque pièce part dans un sens opposé pour l'effet "fan/swirl" */
+        const sign  = idx % 2 === 0 ? 1 : -1;
+        const sxRaw = -dir.z * sign, szRaw = dir.x * sign;
+        const sLen  = Math.sqrt(sxRaw*sxRaw + szRaw*szRaw) || 1;
+        const swirl = { x: sxRaw/sLen, y: 0.20 * sign, z: szRaw/sLen };
+
+        /* ── Spin individuel ── */
         const sv = {
-          x: (Math.random() - 0.5) * 0.010,
-          y: (Math.random() - 0.5) * 0.014,
-          z: (Math.random() - 0.5) * 0.006
+          x: (Math.random() - 0.5) * 0.012,
+          y: (Math.random() - 0.5) * 0.016,
+          z: (Math.random() - 0.5) * 0.007
         };
 
-        /* Rotation accumulée, clampée ±2π pour retour rapide */
+        /* ── Rotation accumulée (clampée ±2π) ── */
         const rot = { x: 0, y: 0, z: 0 };
 
-        objects.push({ mesh, dir, mag, sv, rot });
+        objs.push({ mesh, dir, mag, swirl, sv, rot });
       });
 
-      /* Fade-in propre */
-      setTimeout(() => { cv.style.opacity = '0.96'; }, 300);
+      /* Fade-in */
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { cv.style.opacity = '0.94'; });
+      });
 
-      /* ═══════════════════════════════════════════════════════
+      /* ════════════════════════════════════════════════════════════
          BOUCLE DE RENDU
-      ═══════════════════════════════════════════════════════ */
-      function animate () {
-        requestAnimationFrame(animate);
+      ════════════════════════════════════════════════════════════ */
+      const T0 = Date.now();
 
-        currentExplode += (targetExplode - currentExplode) * 0.038;
-        const expl   = Math.pow(currentExplode, 0.75);
-        const snap   = currentExplode < SNAP_THRESH;
+      function tick () {
+        requestAnimationFrame(tick);
 
-        for (const o of objects) {
-          const { mesh, dir, mag, sv, rot } = o;
+        cur += (tgt - cur) * 0.038;
+        const expl   = Math.pow(cur, 0.72);
+        const snapping = cur < SNAP;
+        const t      = (Date.now() - T0) * 0.001;
 
-          if (snap) {
-            /* ── Réassemblage PARFAIT : snap dur à zéro ── */
+        for (const o of objs) {
+          const { mesh, dir, mag, swirl, sv, rot } = o;
+
+          if (snapping) {
+            /* ── SNAP PARFAIT ── */
             mesh.position.set(0, 0, 0);
             mesh.rotation.set(0, 0, 0);
-            rot.x = 0; rot.y = 0; rot.z = 0;
-            mesh.material.opacity = 1.0;
-            mesh.material.depthWrite = true;
-            if (mesh.children[0]) mesh.children[0].material.opacity = 0.12;
+            mesh.scale.setScalar(1.0);
+            rot.x = rot.y = rot.z = 0;
+            mesh.material.opacity          = 1.0;
+            mesh.material.emissiveIntensity = 0.08;
+            mesh.material.depthWrite        = true;
+            // halo & arêtes quand assemblé
+            if (mesh.children[0]) mesh.children[0].material.opacity = 0.06;
+            if (mesh.children[1]) mesh.children[1].material.opacity = 0.28;
+
           } else {
-            /* ── Position ── */
+            /* ── POSITION avec tourbillon ──
+               Composante radiale + composante tourbillon en sin(π·expl)
+               → les pièces font un arc en sortant, retour direct en rentrant */
             let tx = dir.x * expl * SPREAD * mag;
             let ty = dir.y * expl * SPREAD * mag;
             let tz = dir.z * expl * SPREAD * mag;
+
+            const swirlAmt = Math.sin(expl * Math.PI) * SWIRL * mag;
+            tx += swirl.x * swirlAmt;
+            ty += swirl.y * swirlAmt;
+            tz += swirl.z * swirlAmt;
+
+            /* Clamp : rien ne sort de l'écran */
             const dl2 = Math.sqrt(tx*tx + ty*ty + tz*tz);
-            if (dl2 > MAX_DISPLACE) {
-              const s = MAX_DISPLACE / dl2;
-              tx *= s; ty *= s; tz *= s;
-            }
+            if (dl2 > MAX_DISP) { const s = MAX_DISP/dl2; tx*=s; ty*=s; tz*=s; }
+
             mesh.position.x += (tx - mesh.position.x) * POS_LERP;
             mesh.position.y += (ty - mesh.position.y) * POS_LERP;
             mesh.position.z += (tz - mesh.position.z) * POS_LERP;
 
-            /* ── Rotation individuelle ──
-               Chaque pièce spin proportionnellement à expl.
-               rot * expl → revient naturellement à 0 quand expl→0. */
+            /* ── ROTATION individuelle ──
+               rot.xyz accumule (clampé ±2π)
+               affiché = rot × expl → revient à 0 quand expl→0 */
             rot.x = clamp(rot.x + sv.x * expl, -Math.PI*2, Math.PI*2);
             rot.y = clamp(rot.y + sv.y * expl, -Math.PI*2, Math.PI*2);
             rot.z = clamp(rot.z + sv.z * expl, -Math.PI*2, Math.PI*2);
@@ -226,25 +274,35 @@
             mesh.rotation.y += (rot.y * expl - mesh.rotation.y) * ROT_LERP;
             mesh.rotation.z += (rot.z * expl - mesh.rotation.z) * ROT_LERP;
 
-            /* ── Opacité : plein quand assemblé, léger fade à l'explosion ── */
-            const tOp = 1.0 - expl * 0.22;
-            mesh.material.opacity  += (tOp - mesh.material.opacity)  * 0.05;
-            mesh.material.depthWrite = mesh.material.opacity > 0.95;
-            if (mesh.children[0])
-              mesh.children[0].material.opacity = tOp * 0.14;
+            /* ── Légère expansion de la pièce ── */
+            const tScale = 1.0 + expl * 0.06;
+            mesh.scale.x += (tScale - mesh.scale.x) * 0.06;
+            mesh.scale.y  = mesh.scale.x;
+            mesh.scale.z  = mesh.scale.x;
+
+            /* ── Opacité & émission ── */
+            const tOp = 1.0 - expl * 0.25;
+            mesh.material.opacity           += (tOp - mesh.material.opacity) * 0.05;
+            mesh.material.emissiveIntensity  += ((0.08 + expl * 0.14) - mesh.material.emissiveIntensity) * 0.05;
+            mesh.material.depthWrite          = mesh.material.opacity > 0.92;
+
+            if (mesh.children[0]) mesh.children[0].material.opacity = tOp * 0.12 + expl * 0.10;
+            if (mesh.children[1]) mesh.children[1].material.opacity = 0.28 + expl * 0.18;
           }
         }
 
-        /* Rotation lente scène entière (s'arrête à l'explosion) */
-        scene.rotation.y += 0.00080 * (1 - currentExplode * 0.90);
+        /* Rotation douce de la scène entière quand assemblé */
+        scene.rotation.y += 0.00075 * (1 - cur * 0.88);
+        /* Léger balancement (respiration) */
+        scene.rotation.x  = Math.sin(t * 0.28) * 0.018 * (1 - cur);
 
         renderer.render(scene, camera);
       }
 
-      animate();
+      tick();
     }
 
     function clamp (v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
-  }); /* waitThree */
+  }); /* ready */
 })();
