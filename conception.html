@@ -53,10 +53,11 @@
         <div class="kicker">Le composteur</div>
         <h3>Un fonctionnement autonome</h3>
         <div class="feature-list">
-          <div class="feature-item"><strong>Accès sécurisé</strong><span>Ouverture via QR code pour relier l’action à l’utilisateur.</span></div>
-          <div class="feature-item"><strong>Pesée automatique</strong><span>Le poids des déchets verts est mesuré lors du dépôt.</span></div>
-          <div class="feature-item"><strong>Cuves multiples</strong><span>Le cycle de compostage est mieux organisé et suivi.</span></div>
-          <div class="feature-item"><strong>Autonomie énergétique</strong><span>Le système peut être alimenté par une logique solaire et batterie.</span></div>
+          <div class="feature-item"><strong>Accès sécurisé</strong><span>Ouverture via QR code — chaque dépôt est identifié et traçable.</span></div>
+          <div class="feature-item"><strong>Pesée automatique</strong><span>1 kg de déchets déposés = 100 points crédités, 0,4 kg de compost produit.</span></div>
+          <div class="feature-item"><strong>4 cuves en rotation</strong><span>J+20 transfert cuve 2 · J+40 cuve 3 · J+60 terreau final disponible.</span></div>
+          <div class="feature-item"><strong>Autonomie solaire</strong><span>Panneau solaire + batterie + étage de régulation — aucun raccordement nécessaire.</span></div>
+          <div class="feature-item"><strong>Dimensions</strong><span>1 085 mm de hauteur · 549 × 337 mm au sol · 46 composants uniques.</span></div>
         </div>
       </article>
 
@@ -68,6 +69,43 @@
             <iframe src="https://composte-urabain.vercel.app" allow="geolocation" style="width:100%; height:100%; border:none; border-radius:inherit;"></iframe>
           </div>
         </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Électronique -->
+  <section class="block">
+    <div class="section-head">
+      <div>
+        <div class="kicker">Électronique & logique</div>
+        <h2>Le cerveau du système.</h2>
+      </div>
+      <p>Un contrôle embarqué autonome qui gère la machine indépendamment de l’interface utilisateur.</p>
+    </div>
+    <div class="grid-3">
+      <article class="card">
+        <h3>Arduino Mega</h3>
+        <p>Contrôle matériel centralisé — gestion des moteurs pas à pas, capteurs, actionneurs et logique des cuves.</p>
+      </article>
+      <article class="card">
+        <h3>ESP32</h3>
+        <p>Connectivité Wi-Fi — communication entre l’application mobile et le système embarqué en temps réel.</p>
+      </article>
+      <article class="card">
+        <h3>Protocole I²C</h3>
+        <p>Extension des connexions pour dépasser les limites physiques de broches — gestion de plus de 100 points de connexion.</p>
+      </article>
+      <article class="card">
+        <h3>Capteurs</h3>
+        <p>Température, humidité et indicateurs gaz — surveillance continue des conditions de compostage dans chaque cuve.</p>
+      </article>
+      <article class="card">
+        <h3>Actionneurs</h3>
+        <p>Moteurs pas à pas 28BYJ-48 pour la vis sans fin · vérin électrique pour la trappe d’entrée · ventilation pilotée.</p>
+      </article>
+      <article class="card">
+        <h3>Application mobile</h3>
+        <p>Pilotage ventilation (OFF/régulation/intermittent) · tableau de bord temps réel · boutique compost · mode admin PIN.</p>
       </article>
     </div>
   </section>
@@ -214,7 +252,7 @@
     <div>
       <h4>Réseaux sociaux</h4>
       <div class="social-links">
-        <a href="#" target="_blank" rel="noreferrer">Instagram</a>
+        <a href="https://www.instagram.com/greenloop_passy" target="_blank" rel="noreferrer">Instagram</a>
         <a href="#" target="_blank" rel="noreferrer">TikTok</a>
         <a href="https://github.com/LOZEST/Composte-urabain" target="_blank" rel="noreferrer">GitHub</a>
       </div>
