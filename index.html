@@ -21,7 +21,7 @@
   <div class="page">
 
     <!-- Vidéo 3D arrière-plan -->
-    <video class="hero-3d-video" src="assets/hero-3d.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
+    <video id="hero-3d" class="hero-3d-video" src="assets/hero-3d.mp4" muted preload="auto" playsinline aria-hidden="true"></video>
     <div class="hero-3d-overlay" aria-hidden="true"></div>
 
     <!-- ── Header ──────────────────────────────────────────── -->
@@ -216,5 +216,22 @@
 
   <!-- Three.js BEFORE bg3d.js and script.js -->
   <script src="script.js"></script>
+  <script>
+    (function () {
+      const video = document.getElementById('hero-3d');
+
+      video.addEventListener('loadedmetadata', function () {
+        video.currentTime = 0;
+      });
+
+      function onScroll() {
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        const progress = Math.min(window.scrollY / Math.max(maxScroll, 1), 1);
+        video.currentTime = progress * video.duration;
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+  </script>
 </body>
 </html>
