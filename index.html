@@ -220,16 +220,17 @@
       const video = document.getElementById('hero-3d');
 
       // Courbe non-linéaire : [scrollProgress, videoProgress]
-      // Très lent → explosion rapide → lent final
+      // Lent intro → accélération assembly → fin ultra lente
       const curve = [
         [0.00, 0.00],
-        [0.20, 0.04],  // très lent : mise en place
-        [0.35, 0.10],  // lent : approche
-        [0.48, 0.38],  // décollage brutal
-        [0.55, 0.65],  // pic de rotation ultra rapide
-        [0.62, 0.82],  // encore rapide
-        [0.78, 0.92],  // ralentit fort
-        [1.00, 1.00],  // pose finale
+        [0.18, 0.03],  // très lent : intro
+        [0.32, 0.10],  // lent : approche
+        [0.44, 0.38],  // décollage rapide
+        [0.52, 0.65],  // pic d'assemblage
+        [0.58, 0.80],  // encore rapide
+        [0.65, 0.88],  // premier ralentissement
+        [0.75, 0.93],  // ralentit fort
+        [1.00, 1.00],  // fin ultra lente : 25 % de scroll pour 7 % de vidéo
       ];
 
       function mapProgress(t) {
