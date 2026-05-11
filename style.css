@@ -262,9 +262,15 @@ section.block{
 .conception-overlay{
   position:fixed;top:0;left:0;
   width:100%;height:100%;
-  background:rgba(7,19,15,.62);
+  background:rgba(7,19,15,.75);
   z-index:1;
   pointer-events:none;
+}
+body.conception-page header,
+body.conception-page main,
+body.conception-page footer{
+  position:relative;
+  z-index:2;
 }
 .vision-bg-video{
   position:fixed;top:0;left:0;
