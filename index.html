@@ -7,7 +7,7 @@
   <link rel="icon" href="assets/favicon-circle.png" type="image/png">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="index-page">
 
   <!-- ── Loading screen ────────────────────────────────────── -->
   <div id="gl-loader">
@@ -20,13 +20,9 @@
 
   <div class="page">
 
-    <!-- Ambient particles canvas -->
-    <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
-
-    <!-- Floating colour orbs -->
-    <div class="orb orb-1" aria-hidden="true"></div>
-    <div class="orb orb-2" aria-hidden="true"></div>
-    <div class="orb orb-3" aria-hidden="true"></div>
+    <!-- Vidéo 3D arrière-plan -->
+    <video class="hero-3d-video" src="assets/hero-3d.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
+    <div class="hero-3d-overlay" aria-hidden="true"></div>
 
     <!-- ── Header ──────────────────────────────────────────── -->
     <header class="header">
@@ -219,8 +215,6 @@
   </div><!-- .page -->
 
   <!-- Three.js BEFORE bg3d.js and script.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="bg3d.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
