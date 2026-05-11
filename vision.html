@@ -34,8 +34,21 @@
       <a class="active" href="vision.html">Vision écologique</a>
       <a class="" href="models.html">Modèles 3D</a>
     </nav>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
+<div class="nav-drawer" id="nav-drawer">
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="equipe.html">Équipe & partenaires</a>
+    <a href="conception.html">Conception & app</a>
+    <a class="active" href="vision.html">Vision écologique</a>
+    <a href="models.html">Modèles 3D</a>
+  </nav>
+</div>
+<div class="nav-backdrop" id="nav-backdrop"></div>
 
 <main>
 
@@ -394,11 +407,17 @@
       }
 
       video.addEventListener('ended', unlock);
+      skip.addEventListener('click', function () { video.pause(); unlock(); });
 
-      skip.addEventListener('click', function () {
-        video.pause();
-        unlock();
-      });
+      // Hamburger
+      const btn = document.getElementById('nav-hamburger');
+      const drawer = document.getElementById('nav-drawer');
+      const backdrop = document.getElementById('nav-backdrop');
+      function openDrawer()  { drawer.classList.add('open'); backdrop.classList.add('open'); btn.classList.add('open'); }
+      function closeDrawer() { drawer.classList.remove('open'); backdrop.classList.remove('open'); btn.classList.remove('open'); }
+      btn.addEventListener('click', () => drawer.classList.contains('open') ? closeDrawer() : openDrawer());
+      backdrop.addEventListener('click', closeDrawer);
+      drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', closeDrawer));
     })();
   </script>
 </body>
