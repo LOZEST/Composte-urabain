@@ -18,9 +18,8 @@
   </div>
 
   <div class="page">
-    <canvas id="bg-canvas" class="bg-canvas" aria-hidden="true"></canvas>
-    <div class="orb orb-1" aria-hidden="true"></div>
-    <div class="orb orb-2" aria-hidden="true"></div>
+    <video id="conception-bg" class="conception-bg-video" src="assets/conception-bg.mp4" muted preload="auto" playsinline aria-hidden="true"></video>
+    <div class="conception-overlay" aria-hidden="true"></div>
     
 <header class="header">
   <div class="nav">
@@ -135,8 +134,23 @@
 </footer>
 
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="bg3d.js"></script>
   <script src="script.js"></script>
+  <script>
+    (function () {
+      const video = document.getElementById('conception-bg');
+
+      video.addEventListener('loadedmetadata', function () {
+        video.currentTime = 0;
+      });
+
+      function onScroll() {
+        const maxScroll = document.body.scrollHeight - window.innerHeight;
+        const progress = Math.min(window.scrollY / Math.max(maxScroll, 1), 1);
+        video.currentTime = progress * video.duration;
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+  </script>
 </body>
 </html>
