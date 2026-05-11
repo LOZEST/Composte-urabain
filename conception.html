@@ -139,6 +139,61 @@
     </div>
   </section>
 
+  <!-- Prototype vs échelle réelle -->
+  <section class="block">
+    <div class="section-head">
+      <div>
+        <div class="kicker">Dimensionnement</div>
+        <h2>Du prototype au déploiement réel.</h2>
+      </div>
+      <p>Hypothèses : densité déchets 0,55 kg/L · densité compost 0,60 kg/L · facteur de décomposition 0,25 · rotation toutes les 2 semaines.</p>
+    </div>
+    <div class="grid-2">
+      <article class="card">
+        <div class="kicker">Prototype — r = 48 mm · h = 153 mm</div>
+        <h3>Petite échelle</h3>
+        <div style="display:grid;gap:10px;margin-top:14px;">
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.05);border-radius:12px;">
+            <span style="color:var(--muted);">Volume par cuve</span><strong>1,1 L</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.05);border-radius:12px;">
+            <span style="color:var(--muted);">Déchets entrants (3 cuves)</span><strong>1,8 kg</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.05);border-radius:12px;">
+            <span style="color:var(--muted);">Compost produit (3 cuves)</span><strong>0,45 kg</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(56,214,122,.07);border-radius:12px;">
+            <span style="color:var(--muted);">Production annuelle — mode lent</span><strong style="color:var(--green);">~3,9 kg compost</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(56,214,122,.07);border-radius:12px;">
+            <span style="color:var(--muted);">Production annuelle — mode rapide</span><strong style="color:var(--green);">~5,9 kg compost</strong>
+          </div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="kicker">Échelle réelle — cuves 500 L</div>
+        <h3>Déploiement urbain</h3>
+        <div style="display:grid;gap:10px;margin-top:14px;">
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.05);border-radius:12px;">
+            <span style="color:var(--muted);">Volume par cuve</span><strong>500 L</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.05);border-radius:12px;">
+            <span style="color:var(--muted);">Déchets entrants (3 cuves)</span><strong>825 kg</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.05);border-radius:12px;">
+            <span style="color:var(--muted);">Compost produit (3 cuves)</span><strong>207 kg</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(56,214,122,.07);border-radius:12px;">
+            <span style="color:var(--muted);">Production annuelle — mode lent</span><strong style="color:var(--green);">~1 780 kg compost</strong>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(56,214,122,.07);border-radius:12px;">
+            <span style="color:var(--muted);">Production annuelle — mode rapide</span><strong style="color:var(--green);">~2 690 kg compost</strong>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <!-- Cycle des 4 cuves -->
   <section class="block">
     <div class="section-head">
@@ -176,24 +231,45 @@
   <section class="block">
     <div style="width:var(--container);margin:0 auto;">
       <div style="background:linear-gradient(135deg,rgba(56,214,122,.16),rgba(56,214,122,.05));border:1px solid rgba(56,214,122,.25);border-radius:34px;padding:36px 40px;">
-        <div class="kicker" style="margin-bottom:16px;">Valeur agronomique</div>
-        <h2 style="font-size:clamp(1.6rem,3.5vw,2.2rem);margin-bottom:24px;">Ce que le compost apporte au sol.</h2>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
-          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(56,214,122,.18);border-radius:20px;padding:18px;">
-            <div style="font-size:1.4rem;font-weight:900;color:var(--green);">+30–50 %</div>
-            <p style="margin:6px 0 0;font-size:.9rem;">de biomasse microbienne sur sols amendés <span style="color:var(--muted)">(INRAE)</span></p>
+        <div class="kicker" style="margin-bottom:16px;">Valeur agronomique — Norme NFU 44-051 · INRAE</div>
+        <h2 style="font-size:clamp(1.6rem,3.5vw,2.2rem);margin-bottom:8px;">Ce que le compost apporte au sol.</h2>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:22px;">Composition NPK d’un compost issu d’épluchures de légumes (% matière sèche).</p>
+
+        <!-- NPK table -->
+        <div style="display:grid;gap:8px;margin-bottom:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:10px;font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">
+            <span>Nutriment</span><span>Teneur</span><span>Dispo. 1ʳᵉ année</span><span>Effet</span>
           </div>
-          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(56,214,122,.18);border-radius:20px;padding:18px;">
-            <div style="font-size:1.4rem;font-weight:900;color:var(--green);">540 kg CO₂</div>
-            <p style="margin:6px 0 0;font-size:.9rem;">évités par tonne compostée vs incinération <span style="color:var(--muted)">(ADEME)</span></p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:12px 14px;background:rgba(255,255,255,.05);border-radius:10px;font-size:.88rem;">
+            <span><strong style="color:var(--green);">Azote (N)</strong></span><span>0,8–1,5 %</span><span>10–30 %</span><span style="color:var(--muted);">Libération lente</span>
           </div>
-          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(56,214,122,.18);border-radius:20px;padding:18px;">
-            <div style="font-size:1.4rem;font-weight:900;color:var(--green);">20–30 %</div>
-            <p style="margin:6px 0 0;font-size:.9rem;">de réduction du volume des poubelles grâce au compostage</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:12px 14px;background:rgba(255,255,255,.05);border-radius:10px;font-size:.88rem;">
+            <span><strong style="color:var(--green);">Phosphore (P)</strong></span><span>0,3–0,8 %</span><span>30–50 %</span><span style="color:var(--muted);">≥ 50% engrais</span>
           </div>
-          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(56,214,122,.18);border-radius:20px;padding:18px;">
-            <div style="font-size:1.4rem;font-weight:900;color:var(--green);">5–10 ans</div>
-            <p style="margin:6px 0 0;font-size:.9rem;">d’effet de la matière organique sur la structure du sol</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:12px 14px;background:rgba(255,255,255,.05);border-radius:10px;font-size:.88rem;">
+            <span><strong style="color:var(--green);">Potassium (K)</strong></span><span>0,5–1,2 %</span><span>80–100 %</span><span style="color:var(--muted);">Très disponible</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:12px 14px;background:rgba(255,255,255,.05);border-radius:10px;font-size:.88rem;">
+            <span><strong style="color:var(--green);">Mat. organique</strong></span><span>25–40 %</span><span>—</span><span style="color:var(--muted);">Effet 5–10 ans</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(56,214,122,.18);border-radius:16px;padding:16px;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--green);">+30–50 %</div>
+            <p style="margin:4px 0 0;font-size:.85rem;">de biomasse microbienne sur sols amendés <span style="color:var(--muted)">(INRAE)</span></p>
+          </div>
+          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(56,214,122,.18);border-radius:16px;padding:16px;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--green);">540 kg CO₂</div>
+            <p style="margin:4px 0 0;font-size:.85rem;">évités par tonne compostée vs incinération <span style="color:var(--muted)">(ADEME)</span></p>
+          </div>
+          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(56,214,122,.18);border-radius:16px;padding:16px;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--green);">20–30 %</div>
+            <p style="margin:4px 0 0;font-size:.85rem;">de réduction du volume des poubelles</p>
+          </div>
+          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(56,214,122,.18);border-radius:16px;padding:16px;">
+            <div style="font-size:1.3rem;font-weight:900;color:var(--green);">5–10 ans</div>
+            <p style="margin:4px 0 0;font-size:.85rem;">d’effet sur la structure du sol</p>
           </div>
         </div>
       </div>
