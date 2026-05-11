@@ -214,23 +214,22 @@
 
   </div><!-- .page -->
 
-  <!-- Three.js BEFORE bg3d.js and script.js -->
   <script src="script.js"></script>
   <script>
     (function () {
       const video = document.getElementById('hero-3d');
 
       // Courbe non-linéaire : [scrollProgress, videoProgress]
-      // Lent → rapide (rotation accélère) → lent (pose finale)
+      // Très lent → explosion rapide → lent final
       const curve = [
         [0.00, 0.00],
-        [0.15, 0.06],  // lent : mise en place
-        [0.30, 0.18],  // lent : approche
-        [0.45, 0.42],  // accélération : rotation démarre
-        [0.58, 0.68],  // rapide : pic de rotation
-        [0.70, 0.82],  // rapide : fin de rotation
-        [0.85, 0.93],  // ralentit : assemblage final
-        [1.00, 1.00],  // arrêt
+        [0.20, 0.04],  // très lent : mise en place
+        [0.35, 0.10],  // lent : approche
+        [0.48, 0.38],  // décollage brutal
+        [0.55, 0.65],  // pic de rotation ultra rapide
+        [0.62, 0.82],  // encore rapide
+        [0.78, 0.92],  // ralentit fort
+        [1.00, 1.00],  // pose finale
       ];
 
       function mapProgress(t) {
