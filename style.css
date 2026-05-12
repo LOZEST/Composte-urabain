@@ -359,22 +359,23 @@ body.vision-page .kicker{
 }
 .section-head h2{font-size:clamp(2rem,4vw,3.4rem);max-width:10ch}
 .section-head p{margin:0;color:var(--muted);max-width:580px;font-size:1.06rem}
-.grid-3,.grid-4,.grid-2{
+.grid-3,.grid-4,.grid-5,.grid-2{
   width:var(--container);margin:0 auto;
-  display:grid;gap:18px;
+  display:grid;gap:14px;
 }
 .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grid-5{grid-template-columns:repeat(5,minmax(0,1fr))}
 .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .card{
   border:1px solid var(--line);
   background:var(--card);
-  border-radius:28px;
-  padding:24px;
+  border-radius:22px;
+  padding:18px 20px;
   box-shadow:var(--shadow);
 }
-.card h3{font-size:1.35rem;margin-bottom:10px}
-.card p{margin:0;color:var(--muted)}
+.card h3{font-size:1.1rem;margin-bottom:8px}
+.card p{margin:0;color:var(--muted);font-size:.9rem}
 .step-number{
   display:inline-grid;place-items:center;width:42px;height:42px;border-radius:14px;
   background:rgba(56,214,122,.16);color:var(--green-2);font-weight:800;margin-bottom:14px;
@@ -461,7 +462,7 @@ body.vision-page .kicker{
   color:var(--muted);font-size:.95rem;margin-top:8px
 }
 @media (max-width: 1040px){
-  .hero-grid,.grid-3,.grid-4,.grid-2,.footer-inner{grid-template-columns:1fr 1fr}
+  .hero-grid,.grid-3,.grid-4,.grid-5,.grid-2,.footer-inner{grid-template-columns:1fr 1fr}
   .device-wrap{min-height:620px}
   .phone-shell{right:auto;left:50%;transform:translateX(-50%);top:0}
   .floating-card{left:8%;bottom:26px}
@@ -498,7 +499,7 @@ body.vision-page .kicker{
     width:100%;
     max-width:300px;
   }
-  .grid-3,.grid-4,.grid-2{grid-template-columns:1fr}
+  .grid-3,.grid-4,.grid-5,.grid-2{grid-template-columns:1fr}
   .section-head{flex-direction:column;align-items:flex-start;margin-bottom:16px}
   .section-head h2{font-size:clamp(1.8rem,6vw,2.6rem);max-width:none}
   .footer-inner{grid-template-columns:1fr;gap:20px}
@@ -1330,7 +1331,7 @@ body.vision-page .kicker{
   .cuve-card { padding: 16px; border-radius: 18px; }
 
   /* Grids */
-  .grid-3, .grid-4, .grid-2 { grid-template-columns: 1fr; }
+  .grid-3, .grid-4, .grid-5, .grid-2 { grid-template-columns: 1fr; }
 
   /* Footer */
   .footer-inner { grid-template-columns: 1fr; gap: 20px; }
