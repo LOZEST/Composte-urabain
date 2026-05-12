@@ -292,7 +292,11 @@ body.conception-page footer{
   position:relative;
   z-index:2;
 }
-body.conception-page .card{
+body.conception-page .card,
+body.conception-page .step-card,
+body.conception-page .spec-card,
+body.conception-page .energy-step,
+body.conception-page .cuve-card{
   background:rgba(7,19,15,.82);
   border-color:rgba(255,255,255,.14);
   backdrop-filter:blur(12px);
