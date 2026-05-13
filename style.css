@@ -359,6 +359,13 @@ body.vision-page .kicker{
 }
 .section-head h2{font-size:clamp(2rem,4vw,3.4rem);max-width:10ch}
 .section-head p{margin:0;color:var(--muted);max-width:580px;font-size:1.06rem}
+
+/* Compact vertical header — no gap above cards */
+.section-head-inline{
+  width:var(--container);margin:0 auto 20px;
+}
+.section-head-inline h2{font-size:clamp(1.6rem,3vw,2.2rem);margin:6px 0 8px;letter-spacing:-.04em}
+.section-head-inline p{margin:0;color:var(--muted);font-size:.98rem;max-width:680px}
 .grid-3,.grid-4,.grid-5,.grid-2{
   width:var(--container);margin:0 auto;
   display:grid;gap:14px;
