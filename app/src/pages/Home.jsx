@@ -1,196 +1,136 @@
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { useRef } from 'react'
-import { useInView } from 'framer-motion'
-import PageTransition from '../components/PageTransition'
+import { useEffect, useRef } from 'react'
+import * as THREE from 'three'
 import './Home.css'
 
-const fadeUp = { hidden: { opacity: 0, y: 36 }, visible: { opacity: 1, y: 0 } }
-const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.11 } } }
-
-function Section({ children, className }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: '-60px' })
-  return (
-    <motion.div ref={ref} variants={stagger} initial="hidden" animate={inView ? 'visible' : 'hidden'} className={className}>
-      {children}
-    </motion.div>
-  )
-}
-
 const steps = [
-  { n: '1', title: 'Trouver', desc: "L'utilisateur localise le composteur GreenLoop le plus proche depuis l'application." },
-  { n: '2', title: "S'identifier", desc: "Le QR code sécurise l'accès et permet de reconnaître l'utilisateur." },
-  { n: '3', title: 'Déposer', desc: 'Les déchets verts sont pesés et valorisés automatiquement dans le système.' },
-  { n: '4', title: 'Récupérer', desc: "Les points et le compost disponible peuvent être suivis depuis l'app." },
+  { n: '01', title: 'Trouver', desc: "L'utilisateur localise le composteur GreenLoop le plus proche depuis l'application." },
+  { n: '02', title: "S'identifier", desc: "Le QR code sécurise l'accès et permet de reconnaître l'utilisateur." },
+  { n: '03', title: 'Déposer', desc: 'Les déchets verts sont pesés et valorisés automatiquement dans le système.' },
+  { n: '04', title: 'Récupérer', desc: "Les points et le compost disponible peuvent être suivis depuis l'app." },
 ]
 
-const partners = [
-  { href: 'https://www.paprec.com/', src: '/assets/logo paprec.png', name: 'Paprec' },
-  { href: 'https://www.derichebourg.com/', src: '/assets/logo derichbourg.png', name: 'Derichebourg' },
+function Compost3D() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const canvas = ref.current
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(38, canvas.clientWidth / canvas.clientHeight, 0.1, 100)
+    camera.position.set(0, 1.1, 6)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight)
 
-  { href: 'https://francebiodechets.org/', src: '/assets/logo france.png', name: 'France Biodéchets' },
-  { href: 'https://www.adivalor.fr/', src: '/assets/logo adivalor.png', name: 'Adivalor' },
-  { href: 'https://amorce.asso.fr/', src: '/assets/logo amorce.png', name: 'Amorce' },
-]
+    scene.add(new THREE.AmbientLight(0xffffff, 0.75))
+    const key = new THREE.DirectionalLight(0x7cf7c4, 1.2)
+    key.position.set(3, 5, 4)
+    scene.add(key)
+
+    const body = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.7, 2.3, 3.8, 40),
+      new THREE.MeshStandardMaterial({ color: 0x1f242b, roughness: 0.35, metalness: 0.6 })
+    )
+    scene.add(body)
+
+    const hatch = new THREE.Mesh(
+      new THREE.TorusGeometry(1.72, 0.08, 18, 100),
+      new THREE.MeshStandardMaterial({ color: 0x5ff5b1, emissive: 0x103428, metalness: 0.8 })
+    )
+    hatch.rotation.x = Math.PI / 2
+    hatch.position.y = 1.6
+    scene.add(hatch)
+
+    const base = new THREE.Mesh(
+      new THREE.CylinderGeometry(2.45, 2.45, 0.2, 40),
+      new THREE.MeshStandardMaterial({ color: 0x0f1012, roughness: 0.9 })
+    )
+    base.position.y = -1.95
+    scene.add(base)
+
+    let id
+    const loop = () => {
+      id = requestAnimationFrame(loop)
+      body.rotation.y += 0.0045
+      hatch.rotation.z += 0.008
+      renderer.render(scene, camera)
+    }
+    loop()
+
+    const onResize = () => {
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight)
+      camera.aspect = canvas.clientWidth / canvas.clientHeight
+      camera.updateProjectionMatrix()
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      cancelAnimationFrame(id)
+      window.removeEventListener('resize', onResize)
+      renderer.dispose()
+    }
+  }, [])
+
+  return <canvas ref={ref} className='showcase-canvas' />
+}
 
 export default function Home() {
   return (
-    <PageTransition>
-      <main>
-        {/* ── Hero ── */}
-        <section className="hero">
-          <div className="hero-grid container">
-            <div className="hero-copy">
-              <motion.span
-                className="eyebrow"
-                initial={{ opacity: 0, scale: .88 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: .1, duration: .5 }}
-              >
-                <span className="eyebrow-dot" /> Compostage urbain nouvelle génération
-              </motion.span>
-
-              <motion.h1
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: .25, duration: .7, ease: [.22,1,.36,1] }}
-              >
-                Le composteur urbain intelligent.
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: .4, duration: .6 }}
-              >
-                GreenLoop simplifie le dépôt des déchets organiques en ville grâce à un composteur autonome, une identification par QR code et une application mobile claire.
-              </motion.p>
-
-              <motion.div
-                className="hero-actions"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: .55, duration: .55 }}
-              >
-                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: .97 }}>
-                  <Link className="btn btn-primary" to="/conception">Découvrir l'application</Link>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: .97 }}>
-                  <Link className="btn btn-secondary" to="/vision">Voir la vision du projet</Link>
-                </motion.div>
-              </motion.div>
-
-              <motion.div
-                className="metrics"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: .75, duration: .6 }}
-              >
-                <div className="metric"><strong>Autonome</strong><span>Accès, pesée et suivi pensés pour un usage simple.</span></div>
-                <div className="metric"><strong>Connecté</strong><span>Application mobile et logique de points pour suivre les dépôts.</span></div>
-                <div className="metric"><strong>Urbain</strong><span>Une solution conçue pour les villes, collectivités et lieux partagés.</span></div>
-              </motion.div>
-            </div>
-
-            <motion.div
-              className="device-wrap"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: .3, duration: .8, ease: [.22,1,.36,1] }}
-            >
-              <div className="glow" />
-              <div className="phone-shell">
-                <div className="phone-screen">
-                  <iframe
-                    src="https://composte-urabain.vercel.app"
-                    allow="geolocation"
-                    style={{ width: '100%', height: '100%', border: 'none', borderRadius: 'inherit' }}
-                    title="Application GreenLoop"
-                  />
-                </div>
-              </div>
-              <motion.div
-                className="floating-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: .9, duration: .5 }}
-              >
-                <strong>+240 pts</strong>
-                <p>Valorisation du dépôt et estimation du compost produit.</p>
-              </motion.div>
-            </motion.div>
+    <main className='tourbillon-style'>
+      <section id='hero' className='hero-film'>
+        <div className='hero-overlay container'>
+          <p className='hero-kicker'>GREENLOOP — COMPOSTAGE URBAIN</p>
+          <h1>Une nouvelle expérience du compostage intelligent.</h1>
+          <p>
+            GreenLoop simplifie le dépôt des déchets organiques en ville grâce à un composteur autonome,
+            une identification par QR code et une application mobile claire.
+          </p>
+          <div className='hero-actions'>
+            <a href='#conception' className='btn-light'>Découvrir l'application</a>
+            <a href='#vision' className='btn-outline'>Vision du projet</a>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── Principe ── */}
-        <section className="block">
-          <Section>
-            <div className="section-head container">
-              <div>
-                <motion.div className="kicker" variants={fadeUp}>Le principe</motion.div>
-                <motion.h2 variants={fadeUp}>Un parcours simple du déchet au compost.</motion.h2>
-              </div>
-            </div>
-            <div className="grid-4 container">
-              {steps.map(s => (
-                <motion.article key={s.n} className="card" variants={fadeUp} whileHover={{ y: -5, transition: { duration: .2 } }}>
-                  <div className="step-number">{s.n}</div>
-                  <h3>{s.title}</h3>
-                  <p>{s.desc}</p>
-                </motion.article>
-              ))}
-            </div>
-          </Section>
-        </section>
+      <section id='modeles' className='showcase-3d container'>
+        <div>
+          <p className='section-kicker'>MODÈLES 3D</p>
+          <h2>Explorer la conception du prototype.</h2>
+          <p>Visualisez l'assemblage final du composteur GreenLoop en 3D.</p>
+        </div>
+        <Compost3D />
+      </section>
 
-        {/* ── Partenaires ── */}
-        <section className="block">
-          <Section>
-            <div className="section-head container">
-              <div>
-                <motion.div className="kicker" variants={fadeUp}>Les partenaires</motion.div>
-                <motion.h2 variants={fadeUp}>Des soutiens visibles sur le projet.</motion.h2>
-              </div>
-              <motion.p variants={fadeUp}>Des acteurs engagés qui accompagnent et soutiennent le projet GreenLoop.</motion.p>
-            </div>
-            <div className="partner-logos container">
-              {partners.map(p => (
-                <motion.a
-                  key={p.name}
-                  className="logo-card"
-                  href={p.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  variants={fadeUp}
-                  whileHover={{ y: -5, transition: { duration: .2 } }}
-                >
-                  <div className="logo-box">
-                    <img src={p.src} alt={p.name} />
-                  </div>
-                  <strong>{p.name}</strong>
-                </motion.a>
-              ))}
-            </div>
-          </Section>
-        </section>
+      <section id='conception' className='section-split container'>
+        <div className='phone-panel'>
+          <iframe src='https://composte-urabain.vercel.app' title='Application GreenLoop' allow='geolocation' />
+        </div>
+        <div>
+          <p className='section-kicker'>CONCEPTION & APPLICATION</p>
+          <h2>Une solution technique pensée pour être simple à utiliser.</h2>
+          <ul>
+            <li><strong>Accès sécurisé</strong> via QR code.</li>
+            <li><strong>Pesée automatique</strong> des dépôts.</li>
+            <li><strong>Chaîne d'énergie</strong> solaire + batterie.</li>
+            <li><strong>Suivi mobile</strong> des points et du compost.</li>
+          </ul>
+        </div>
+      </section>
 
-        {/* ── CTA band ── */}
-        <Section>
-          <motion.div className="cta-band container" variants={fadeUp}>
-            <div>
-              <div className="kicker">Explorer GreenLoop</div>
-              <h3>Poursuivre la découverte du projet.</h3>
-            </div>
-            <div className="index-links">
-              <Link to="/equipe">Équipe & partenaires</Link>
-              <Link to="/conception">Conception & app</Link>
-              <Link to="/vision">Vision écologique</Link>
-              <Link to="/modeles">Modèles 3D</Link>
-            </div>
-          </motion.div>
-        </Section>
-      </main>
-    </PageTransition>
+      <section id='vision' className='dark-band'>
+        <div className='container'>
+          <p className='section-kicker'>VISION ÉCOLOGIQUE</p>
+          <h2>Rendre le compostage urbain plus visible, plus simple et plus utile.</h2>
+          <div className='stats-row'>
+            <article><strong>30%</strong><span>des déchets ménagers sont compostables.</span></article>
+            <article><strong>150–200 kg</strong><span>de biodéchets par foyer et par an.</span></article>
+            <article><strong>Impact local</strong><span>Moins de transport, moins d'incinération, plus d'engrais naturel.</span></article>
+          </div>
+        </div>
+      </section>
+
+      <section id='equipe' className='section-steps container'>
+        <p className='section-kicker'>ÉQUIPE & PARCOURS UTILISATEUR</p>
+        <h2>Du geste citoyen à la valorisation locale.</h2>
+        <div className='steps-grid'>{steps.map(s => <article key={s.n}><span>{s.n}</span><h3>{s.title}</h3><p>{s.desc}</p></article>)}</div>
+      </section>
+    </main>
   )
 }
